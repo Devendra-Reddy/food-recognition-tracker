@@ -1,0 +1,124 @@
+{
+  "food_entries": [
+    {
+      "id": "6181cd63-2b05-4072-957c-dafdf491b707",
+      "timestamp": "2025-09-26T16:15:02.678779",
+      "created_at": "2025-09-26T16:15:02.678779",
+      "food_name": "Detected Food",
+      "api_used": "nutrition",
+      "nutrition": {
+        "calories": 200,
+        "protein": 8,
+        "fat": 8,
+        "carbs": 25,
+        "fiber": 2,
+        "sugar": 6,
+        "sodium": 150,
+        "data_source": "local_database",
+        "food_name": "Detected Food",
+        "health_analysis": {
+          "calorie_level": "Moderate",
+          "protein_level": "Good Protein",
+          "fat_level": "High Fat",
+          "carb_level": "Moderate Carb",
+          "fiber_level": "Some Fiber",
+          "sugar_level": "Moderate Sugar",
+          "sodium_level": "Moderate Sodium"
+        },
+        "health_score": 100,
+        "sustainability": {
+          "carbon_footprint": "Unknown",
+          "water_usage": "Unknown",
+          "seasonality": "Unknown"
+        },
+        "seasonal": {
+          "is_in_season": false,
+          "seasons": [
+            "Year-round"
+          ]
+        }
+      },
+      "health_rating": "Moderate",
+      "recommendation": "Okay to eat occasionally. Consider portion size.",
+      "portion_suggestion": "A standard serving size is recommended",
+      "analysis_metadata": {
+        "health_score": 100,
+        "data_source": "local_database",
+        "sustainability": {
+          "carbon_footprint": "Unknown",
+          "water_usage": "Unknown",
+          "seasonality": "Unknown"
+        },
+        "seasonal": {
+          "is_in_season": false,
+          "seasons": [
+            "Year-round"
+          ]
+        }
+      }
+    },
+    {
+      "id": "74d07fed-9669-47c0-adc5-d87b8f18260e",
+      "timestamp": "2025-09-26T16:15:53.708328",
+      "created_at": "2025-09-26T16:15:53.708328",
+      "food_name": "Detected Food",
+      "api_used": "spoonacular",
+      "nutrition": {
+        "calories": 200,
+        "protein": 8,
+        "fat": 8,
+        "carbs": 25,
+        "fiber": 2,
+        "sugar": 6,
+        "sodium": 150,
+        "data_source": "spoonacular_mock",
+        "food_name": "Detected Food",
+        "recipe_id": 12345,
+        "servings": 1,
+        "ready_in_minutes": 0,
+        "api_used": "Spoonacular (Mock)",
+        "health_analysis": {
+          "calorie_level": "Moderate",
+          "protein_level": "Good Protein",
+          "fat_level": "High Fat",
+          "carb_level": "Moderate Carb",
+          "fiber_level": "Some Fiber",
+          "sugar_level": "Moderate Sugar",
+          "sodium_level": "Moderate Sodium"
+        },
+        "health_score": 100,
+        "sustainability": {
+          "carbon_footprint": "Unknown",
+          "water_usage": "Unknown",
+          "seasonality": "Unknown"
+        },
+        "seasonal": {
+          "is_in_season": false,
+          "seasons": [
+            "Year-round"
+          ]
+        }
+      },
+      "health_rating": "Moderate",
+      "recommendation": "Okay to eat occasionally. Consider portion size.",
+      "portion_suggestion": "A standard serving size is recommended",
+      "analysis_metadata": {
+        "health_score": 100,
+        "data_source": "spoonacular_mock",
+        "sustainability": {
+          "carbon_footprint": "Unknown",
+          "water_usage": "Unknown",
+          "seasonality": "Unknown"
+        },
+        "seasonal": {
+          "is_in_season": false,
+          "seasons": [
+            "Year-round"
+          ]
+        }
+      }
+    }
+  ],
+  "user_sessions": {},
+  "api_logs": []
+}

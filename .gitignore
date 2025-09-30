@@ -1,0 +1,206 @@
+# Food Recognition Tracker - Git Ignore File
+# Week 1-2 MVP Implementation
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime Data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage Directory Used by Tools Like Istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded Files
+uploads/
+static/uploads/
+temp/
+tmp/
+
+# Model Files and Datasets
+models/
+datasets/
+*.h5
+*.pkl
+*.joblib
+
+# API Keys and Secrets (backup protection)
+secrets/
+credentials/
+api_keys.txt
+config_secrets.py
+
+# Backup Files
+*.backup
+*.bak
+backups/
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Large files
+*.mp4
+*.avi
+*.mov
+*.zip
+*.tar.gz
+*.rar
+
+# Node.js (for any frontend tools)
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Production build files
+/build
+/dist
+
+# Temporary files
+*.tmp
+*.temp
+
+# Configuration files with sensitive data
+local_config.py
+production_config.py
+
+# Certificate files
+*.pem
+*.key
+*.crt
+
+# Docker
+.dockerignore
+
+# Conda
+.conda/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Profiling files
+*.prof
+
+# Memory dumps
+*.hprof
+
+# Test outputs
+test_results/
+test_outputs/
+
+# Documentation builds
+docs/_build/
+
+# Translations
+*.mo
+*.pot

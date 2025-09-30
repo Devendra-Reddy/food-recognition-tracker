@@ -1,0 +1,199 @@
+/* Component-based CSS for modularity */
+.upload-area {
+    border: 3px dashed #d1d9ff;
+    border-radius: 15px;
+    padding: 40px 20px;
+    margin: 20px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f8f9ff, #ffffff);
+}
+
+.upload-area:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #e8f2ff, #f8f9ff);
+}
+
+.upload-area.dragover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #e8f2ff, #f0f8ff);
+    transform: scale(1.02);
+}
+
+.api-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.api-option {
+    background: #f8f9ff;
+    border: 2px solid #e1e8ff;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.api-option.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.nutrition-item {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #e1e8ff;
+    transition: transform 0.2s ease;
+}
+
+.nutrition-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+}
+
+.history-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid #e1e8ff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    border-color: #667eea;
+    transform: translateX(5px);
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease;
+}
+
+.notification.error {
+    border-left: 4px solid #ff6b6b;
+}
+
+.notification.success {
+    border-left: 4px solid #00d4aa;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+/* Demographic Panel Styles */
+.demographic-panel {
+    background: #f8f9ff;
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid #e1e8ff;
+    margin-top: 20px;
+}
+
+.demographic-item {
+    margin: 15px 0;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.demographic-item h4 {
+    margin: 0 0 10px 0;
+    color: #667eea;
+    font-size: 1.1em;
+}
+
+.demographic-item p {
+    margin: 5px 0;
+    font-size: 0.95em;
+}
+
+/* Go Back Button */
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 4px solid #00d4aa;
+}
+
+.notification.error {
+    border-left-color: #ff6b6b;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+}
+
+.rating-unknown {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #e9ecef;
+}

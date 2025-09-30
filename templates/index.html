@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Recognition Tracker - Enhanced</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <div class="nav-brand">
+                <h1>🍎 FoodTracker</h1>
+            </div>
+            <div class="nav-links">
+                <button class="nav-link active" data-section="uploadSection">Analyze</button>
+                <button class="nav-link" data-section="historySection">History</button>
+                <button class="nav-link" data-section="preferencesSection">Settings</button>
+            </div>
+        </nav>
+
+        <!-- Upload Section -->
+        <section id="uploadSection" class="app-section active">
+            <div class="card">
+                <div class="header">
+                    <h1>🍎 Food Recognition Tracker</h1>
+                    <p>AI-Powered Nutritional Analysis with Computer Vision</p>
+                </div>
+                
+                <!-- API Selection -->
+                <div class="api-selection">
+                    <h3>📡 Select Analysis API</h3>
+                    <div class="api-options">
+                        <div class="api-option active" data-api="nutrition">
+                            <strong>Nutrition API</strong>
+                            <div>Detailed nutrition facts</div>
+                        </div>
+                        <div class="api-option" data-api="roboflow">
+                            <strong>Roboflow Detection</strong>
+                            <div>Computer vision only</div>
+                        </div>
+                        <div class="api-option" data-api="spoonacular">
+                            <strong>Spoonacular</strong>
+                            <div>Recipe & nutrition data</div>
+                        </div>
+                        <div class="api-option" data-api="bodyrequirements">
+                            <strong>Daily Requirements</strong>
+                            <div>Recommended daily values</div>
+                        </div>
+                    </div>
+                    <p id="apiInstructions" style="margin-top: 10px; font-style: italic;">
+                        Get detailed nutrition facts and health insights
+                    </p>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="card upload-section">
+                <h2>📸 Upload Food Image</h2>
+                
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="hidden" name="api" id="selectedApi" value="nutrition">
+                    <input type="file" name="image" id="fileInput" class="file-input" accept="image/*" required>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-prompt">
+                            <div class="upload-icon">📁</div>
+                            <p><strong>Drop your food image here</strong></p>
+                            <p>or click to browse files</p>
+                            <p style="font-size: 0.9em; margin-top: 10px; opacity: 0.7;">
+                                Supports: JPG, PNG, WEBP, GIF (max 5MB)
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-container" id="imagePreview">
+                        <!-- Image preview will appear here -->
+                    </div>
+                    
+                    <button type="button" class="btn-primary" id="analyzeBtn" disabled>
+                        🔍 Analyze Food
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loadingSection" class="app-section">
+            <div class="card loading">
+                <div class="spinner"></div>
+                <h3>🧠 Analyzing your food...</h3>
+                <p>Using AI to detect food and calculate nutrition</p>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="app-section">
+            <div class="card">
+                <div class="result-header">
+                    <div class="food-name" id="resultFoodName">Detected Food</div>
+                    <div class="health-rating" id="resultHealthRating">Health Rating</div>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="nutrition-panel">
+                        <h3>📊 Nutritional Information</h3>
+                        <div id="nutritionData" class="nutrition-grid">
+                            <!-- Nutrition data will appear here -->
+                        </div>
+                    </div>
+                    <!-- In the Results Section, add this after the nutrition panel -->
+<section id="resultsSection" class="app-section">
+    <div class="card">
+        <!-- Add Go Back Button -->
+        <div class="result-header">
+            <button id="goBackButton" class="btn-secondary">← Back to Analysis</button>
+            <div>
+                <div class="food-name" id="resultFoodName">Detected Food</div>
+                <div class="health-rating" id="resultHealthRating">Health Rating</div>
+            </div>
+        </div>
+        
+        <div class="results-grid">
+            <div class="nutrition-panel">
+                <h3>📊 Nutritional Information</h3>
+                <div id="nutritionData" class="nutrition-grid"></div>
+            </div>
+            
+            <div class="demographic-panel">
+                <h3>🌍 Food Demographics & Culture</h3>
+                <div id="demographicInfo">
+                    <!-- Demographic info will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="recommendation-panel">
+            <div class="recommendation-text" id="recommendationText"></div>
+            <div class="portion-text" id="portionSuggestion"></div>
+        </div>
+    </div>
+</section>
+                    <div class="additional-info">
+                        <div id="sustainabilityInfo">
+                            <!-- Sustainability info will appear here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recommendation-panel">
+                    <div class="recommendation-text" id="recommendationText">
+                        Analyzing nutritional impact...
+                    </div>
+                    <div class="portion-text" id="portionSuggestion">
+                        Calculating portion recommendation...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historySection" class="app-section">
+            <div class="card">
+                <div class="section-header">
+                    <h2>📚 Analysis History</h2>
+                    <button id="clearHistory" class="btn-secondary">Clear History</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <!-- History items will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Preferences Section -->
+        <section id="preferencesSection" class="app-section">
+            <div class="card">
+                <div class="preferences-form">
+                    <h3>⚙️ Nutrition Goals</h3>
+                    <form id="preferencesForm">
+                        <div class="preference-item">
+                            <label for="calorieGoal">Daily Calorie Goal:</label>
+                            <input type="number" id="calorieGoal" value="2000" min="0">
+                        </div>
+                        <div class="preference-item">
+                            <label for="proteinGoal">Daily Protein Goal (g):</label>
+                            <input type="number" id="proteinGoal" value="50" min="0">
+                        </div>
+                        <div class="preference-item">
+                            <label for="carbsGoal">Daily Carbs Goal (g):</label>
+                            <input type="number" id="carbsGoal" value="300" min="0">
+                        </div>
+                        <div class="preference-item">
+                            <label for="fatGoal">Daily Fat Goal (g):</label>
+                            <input type="number" id="fatGoal" value="70" min="0">
+                        </div>
+                        <button type="button" id="savePreferences" class="btn-primary">Save Preferences</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='js/constants.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/services/api.service.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/services/storage.service.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
