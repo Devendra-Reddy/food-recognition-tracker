@@ -1,5 +1,1 @@
-# Create Procfile
-echo "web: gunicorn app:app" > Procfile
-
-git add Procfile
-git commit -m "Add Procfile"
+web: gunicorn app:app --bind 0.0.0.0:$PORT
