@@ -1,74 +1,8 @@
-# Food Recognition Tracker - Production Dependencies
-# For deployment on Render
-
-# Web Framework
+# Food Recognition Tracker - Railway.app
 Flask==2.3.3
 Flask-CORS==4.0.0
-
-# Environment & Configuration
 python-dotenv==1.0.0
-
-# HTTP Requests
 requests==2.31.0
-
-# File Handling & Security
 Werkzeug==2.3.7
-
-# Database (MongoDB)
-pymongo==4.5.0
-dnspython==2.4.2
-
-# Data Processing
-numpy==1.24.3
-pandas==2.0.3
-
-# Image Processing
-Pillow==10.0.0
-opencv-python-headless==4.8.1.78
-
-# API Clients
-kagglehub==0.1.6
-
-# Authentication (Future Use)
-PyJWT==2.8.0
-authlib==1.2.1
-
-# Caching & Performance
-redis==5.0.1
-python-memcached==1.59
-
-# Email (Future Features)
-Flask-Mail==0.9.1
-
-# Rate Limiting
-Flask-Limiter==3.3.0
-
-# Security
-bcrypt==4.0.1
-cryptography==41.0.4
-
-# Testing & Development
-pytest==7.4.2
-pytest-flask==1.2.0
-pytest-cov==4.1.0
-
-# Code Quality
-black==23.7.0
-flake8==6.1.0
-isort==5.12.0
-
-# Monitoring & Logging
-blinker==1.6.3
-structlog==23.1.0
-
-# Production WSGI Server
 gunicorn==21.2.0
-
-# Process Management
-supervisor==4.2.5
-
-# Utility Libraries
-click==8.1.7
-Jinja2==3.1.2
-MarkupSafe==2.1.3
-itsdangerous==2.1.2
+Pillow==10.0.0
