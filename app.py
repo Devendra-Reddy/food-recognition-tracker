@@ -75,6 +75,9 @@ NUTRITION_DB = {
     "strawberry": {"calories": 32, "protein": 0.7, "fat": 0.3, "carbs": 8, "fiber": 2, "sugar": 5, "sodium": 1, "category": "healthy"},
     "watermelon": {"calories": 30, "protein": 0.6, "fat": 0.2, "carbs": 8, "fiber": 0.4, "sugar": 6, "sodium": 1, "category": "healthy"},
     "mango": {"calories": 60, "protein": 0.8, "fat": 0.4, "carbs": 15, "fiber": 1.6, "sugar": 14, "sodium": 1, "category": "healthy"},
+    "blueberry": {"calories": 84, "protein": 1.1, "fat": 0.5, "carbs": 21, "fiber": 4, "sugar": 15, "sodium": 1, "category": "healthy"},
+    "pineapple": {"calories": 50, "protein": 0.5, "fat": 0.1, "carbs": 13, "fiber": 1.4, "sugar": 10, "sodium": 1, "category": "healthy"},
+    "kiwi": {"calories": 42, "protein": 0.8, "fat": 0.4, "carbs": 10, "fiber": 2.1, "sugar": 6, "sodium": 2, "category": "healthy"},
     
     # Vegetables (Healthy)
     "broccoli": {"calories": 31, "protein": 2.6, "fat": 0.3, "carbs": 6, "fiber": 2.4, "sugar": 1.5, "sodium": 30, "category": "healthy"},
@@ -83,30 +86,71 @@ NUTRITION_DB = {
     "lettuce": {"calories": 5, "protein": 0.5, "fat": 0.1, "carbs": 1, "fiber": 0.6, "sugar": 0.4, "sodium": 3, "category": "healthy"},
     "potato": {"calories": 77, "protein": 2, "fat": 0.1, "carbs": 17, "fiber": 2.2, "sugar": 0.8, "sodium": 6, "category": "moderate"},
     "salad": {"calories": 65, "protein": 3, "fat": 0.5, "carbs": 12, "fiber": 4, "sugar": 6, "sodium": 15, "category": "healthy"},
+    "spinach": {"calories": 23, "protein": 2.9, "fat": 0.4, "carbs": 3.6, "fiber": 2.2, "sugar": 0.4, "sodium": 79, "category": "healthy"},
+    "cucumber": {"calories": 16, "protein": 0.7, "fat": 0.1, "carbs": 3.6, "fiber": 0.5, "sugar": 1.7, "sodium": 2, "category": "healthy"},
+    "bell pepper": {"calories": 31, "protein": 1, "fat": 0.3, "carbs": 6, "fiber": 2.1, "sugar": 4.2, "sodium": 4, "category": "healthy"},
+    "onion": {"calories": 40, "protein": 1.1, "fat": 0.1, "carbs": 9, "fiber": 1.7, "sugar": 4.2, "sodium": 4, "category": "healthy"},
     
     # Proteins (Healthy/Moderate)
     "chicken": {"calories": 165, "protein": 31, "fat": 3.6, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 74, "category": "healthy"},
     "fish": {"calories": 206, "protein": 22, "fat": 12, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 59, "category": "healthy"},
+    "salmon": {"calories": 208, "protein": 20, "fat": 13, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 59, "category": "healthy"},
+    "tuna": {"calories": 154, "protein": 25, "fat": 5, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 39, "category": "healthy"},
+    "shrimp": {"calories": 99, "protein": 18, "fat": 1.4, "carbs": 1, "fiber": 0, "sugar": 0, "sodium": 111, "category": "healthy"},
     "egg": {"calories": 78, "protein": 6.3, "fat": 5.3, "carbs": 0.6, "fiber": 0, "sugar": 0.6, "sodium": 62, "category": "healthy"},
     "beef": {"calories": 250, "protein": 26, "fat": 17, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 72, "category": "moderate"},
+    "pork": {"calories": 242, "protein": 27, "fat": 14, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 62, "category": "moderate"},
+    "turkey": {"calories": 135, "protein": 30, "fat": 0.7, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 55, "category": "healthy"},
+    "lamb": {"calories": 294, "protein": 25, "fat": 21, "carbs": 0, "fiber": 0, "sugar": 0, "sodium": 72, "category": "moderate"},
     
     # Grains (Moderate)
     "rice": {"calories": 130, "protein": 2.7, "fat": 0.3, "carbs": 28, "fiber": 0.4, "sugar": 0.1, "sodium": 1, "category": "moderate"},
     "bread": {"calories": 265, "protein": 9, "fat": 3.2, "carbs": 49, "fiber": 3, "sugar": 5, "sodium": 491, "category": "moderate"},
     "pasta": {"calories": 220, "protein": 8, "fat": 1.5, "carbs": 44, "fiber": 2, "sugar": 2, "sodium": 4, "category": "moderate"},
+    "noodle": {"calories": 220, "protein": 8, "fat": 1.5, "carbs": 44, "fiber": 2, "sugar": 2, "sodium": 4, "category": "moderate"},
+    "quinoa": {"calories": 120, "protein": 4.4, "fat": 1.9, "carbs": 21, "fiber": 2.8, "sugar": 0.9, "sodium": 7, "category": "healthy"},
+    "oatmeal": {"calories": 68, "protein": 2.4, "fat": 1.4, "carbs": 12, "fiber": 1.7, "sugar": 0.5, "sodium": 49, "category": "healthy"},
     
     # Junk Food (Unhealthy)
     "pizza": {"calories": 285, "protein": 12, "fat": 10, "carbs": 36, "fiber": 2, "sugar": 4, "sodium": 640, "category": "junk"},
     "burger": {"calories": 540, "protein": 25, "fat": 31, "carbs": 40, "fiber": 3, "sugar": 5, "sodium": 1040, "category": "junk"},
+    "hamburger": {"calories": 540, "protein": 25, "fat": 31, "carbs": 40, "fiber": 3, "sugar": 5, "sodium": 1040, "category": "junk"},
+    "cheeseburger": {"calories": 580, "protein": 28, "fat": 35, "carbs": 42, "fiber": 3, "sugar": 6, "sodium": 1150, "category": "junk"},
     "hot dog": {"calories": 150, "protein": 5, "fat": 13, "carbs": 2, "fiber": 0, "sugar": 1, "sodium": 572, "category": "junk"},
+    "hotdog": {"calories": 150, "protein": 5, "fat": 13, "carbs": 2, "fiber": 0, "sugar": 1, "sodium": 572, "category": "junk"},
     "fries": {"calories": 312, "protein": 3.4, "fat": 15, "carbs": 41, "fiber": 3.8, "sugar": 0.2, "sodium": 210, "category": "junk"},
+    "french fries": {"calories": 312, "protein": 3.4, "fat": 15, "carbs": 41, "fiber": 3.8, "sugar": 0.2, "sodium": 210, "category": "junk"},
     "donut": {"calories": 195, "protein": 2.3, "fat": 11, "carbs": 23, "fiber": 0.9, "sugar": 10, "sodium": 181, "category": "junk"},
+    "doughnut": {"calories": 195, "protein": 2.3, "fat": 11, "carbs": 23, "fiber": 0.9, "sugar": 10, "sodium": 181, "category": "junk"},
     "ice cream": {"calories": 207, "protein": 3.5, "fat": 11, "carbs": 24, "fiber": 0.7, "sugar": 21, "sodium": 80, "category": "junk"},
+    "icecream": {"calories": 207, "protein": 3.5, "fat": 11, "carbs": 24, "fiber": 0.7, "sugar": 21, "sodium": 80, "category": "junk"},
     "cake": {"calories": 257, "protein": 3, "fat": 10, "carbs": 42, "fiber": 1, "sugar": 25, "sodium": 242, "category": "junk"},
     "chocolate": {"calories": 546, "protein": 4.9, "fat": 31, "carbs": 61, "fiber": 7, "sugar": 48, "sodium": 6, "category": "junk"},
+    "candy": {"calories": 150, "protein": 0, "fat": 3, "carbs": 32, "fiber": 0, "sugar": 28, "sodium": 15, "category": "junk"},
+    "cookie": {"calories": 49, "protein": 0.6, "fat": 2.3, "carbs": 6.8, "fiber": 0.2, "sugar": 3.9, "sodium": 32, "category": "junk"},
+    "chips": {"calories": 152, "protein": 2, "fat": 10, "carbs": 15, "fiber": 1.4, "sugar": 0.2, "sodium": 149, "category": "junk"},
+    "potato chips": {"calories": 152, "protein": 2, "fat": 10, "carbs": 15, "fiber": 1.4, "sugar": 0.2, "sodium": 149, "category": "junk"},
+    "soda": {"calories": 140, "protein": 0, "fat": 0, "carbs": 39, "fiber": 0, "sugar": 39, "sodium": 45, "category": "junk"},
+    "popcorn": {"calories": 55, "protein": 1, "fat": 0.6, "carbs": 11, "fiber": 2, "sugar": 0.1, "sodium": 1, "category": "moderate"},
+    "nachos": {"calories": 346, "protein": 9, "fat": 19, "carbs": 36, "fiber": 3, "sugar": 2, "sodium": 816, "category": "junk"},
+    
+    # Dairy
+    "milk": {"calories": 103, "protein": 8, "fat": 2.4, "carbs": 12, "fiber": 0, "sugar": 12, "sodium": 107, "category": "healthy"},
+    "cheese": {"calories": 113, "protein": 7, "fat": 9, "carbs": 1, "fiber": 0, "sugar": 0.5, "sodium": 174, "category": "moderate"},
+    "yogurt": {"calories": 59, "protein": 10, "fat": 0.4, "carbs": 3.6, "fiber": 0, "sugar": 3.2, "sodium": 36, "category": "healthy"},
+    "butter": {"calories": 717, "protein": 0.9, "fat": 81, "carbs": 0.1, "fiber": 0, "sugar": 0.1, "sodium": 11, "category": "moderate"},
+    
+    # Other dishes
+    "sandwich": {"calories": 300, "protein": 15, "fat": 12, "carbs": 35, "fiber": 3, "sugar": 4, "sodium": 650, "category": "moderate"},
+    "taco": {"calories": 170, "protein": 8, "fat": 10, "carbs": 13, "fiber": 3, "sugar": 1, "sodium": 310, "category": "moderate"},
+    "burrito": {"calories": 445, "protein": 21, "fat": 16, "carbs": 58, "fiber": 6, "sugar": 4, "sodium": 957, "category": "moderate"},
+    "soup": {"calories": 85, "protein": 4, "fat": 2, "carbs": 12, "fiber": 2, "sugar": 3, "sodium": 800, "category": "healthy"},
+    "sushi": {"calories": 200, "protein": 8, "fat": 1, "carbs": 40, "fiber": 3, "sugar": 8, "sodium": 335, "category": "healthy"},
+    "ramen": {"calories": 436, "protein": 20, "fat": 14, "carbs": 54, "fiber": 4, "sugar": 5, "sodium": 1500, "category": "moderate"},
     
     # Default
-    "mixed food": {"calories": 200, "protein": 8, "fat": 8, "carbs": 25, "fiber": 2, "sugar": 6, "sodium": 150, "category": "moderate"}
+    "mixed food": {"calories": 200, "protein": 8, "fat": 8, "carbs": 25, "fiber": 2, "sugar": 6, "sodium": 150, "category": "moderate"},
+    "unknown food": {"calories": 150, "protein": 6, "fat": 6, "carbs": 20, "fiber": 2, "sugar": 4, "sodium": 100, "category": "moderate"}
 }
 
 def allowed_file(filename):
@@ -203,21 +247,13 @@ def process_food_analysis(data, progress_callback):
         raise Exception(f"Analysis failed: {str(e)}")
 
 def detect_food_simple(image_path):
-    """Simple fallback detection"""
-    filename = os.path.basename(image_path).lower()
-    
-    # Try to match from filename
-    for food in NUTRITION_DB.keys():
-        if food in filename:
-            return food
-    
-    # Default fallback
+    """Simple fallback detection - should rarely be used"""
     foods = ["apple", "banana", "pizza", "burger", "salad", "chicken"]
     return random.choice(foods)
 
 def get_nutrition_data(food_name):
     """Get nutrition data from database"""
-    food_lower = food_name.lower()
+    food_lower = food_name.lower().strip()
     
     # Direct match
     if food_lower in NUTRITION_DB:
@@ -413,7 +449,7 @@ def get_job_status(job_id):
 def history():
     """Get analysis history"""
     return jsonify({
-        "results": list(reversed(results_store[-20:])),  # Last 20 scans
+        "results": list(reversed(results_store[-20:])),
         "analytics": user_analytics
     })
 
@@ -441,11 +477,11 @@ def shutdown_agent(exception=None):
         background_agent.stop()
 
 if __name__ == "__main__":
-    print("🚀 Food Recognition Tracker - Final Version")
-    print("✅ Real-time food detection")
-    print("✅ Automatic API selection")
-    print("✅ Food category classification")
-    print("✅ Health recommendations")
+    print("🚀 Food Recognition Tracker - Enhanced Version")
+    print("✅ Real-time food detection with Roboflow AI")
+    print("✅ Accurate food classification")
+    print("✅ Health recommendations & body requirements")
+    print("✅ Background processing enabled")
     print("🔗 Visit: http://localhost:5000")
     
     try:
