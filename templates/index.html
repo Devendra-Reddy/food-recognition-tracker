@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Recognition Tracker - Enhanced UX</title>
+    <title>Food Recognition Tracker</title>
     <style>
         * {
             margin: 0;
@@ -80,38 +80,6 @@
             display: none;
         }
 
-        .api-selector {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .api-button {
-            padding: 12px 24px;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .api-button:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .api-button.active {
-            background: #667eea;
-            color: white;
-        }
-
         .analyze-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -123,6 +91,7 @@
             font-weight: 600;
             transition: all 0.3s ease;
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            margin-top: 20px;
         }
 
         .analyze-button:hover {
@@ -199,12 +168,20 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .food-name {
             font-size: 1.8em;
             font-weight: bold;
             color: #333;
+        }
+
+        .detection-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
         }
 
         .health-badge {
@@ -290,6 +267,82 @@
             border-left: 4px solid #667eea;
         }
 
+        .body-requirements-section {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #ff9800;
+        }
+
+        .body-requirements-section h3 {
+            color: #e65100;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .requirement-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .requirement-label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .requirement-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ff9800;
+        }
+
+        .comparison-bar {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .comparison-item {
+            margin-bottom: 15px;
+        }
+
+        .comparison-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .comparison-bar-bg {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .comparison-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
         .history-section {
             margin-top: 40px;
         }
@@ -313,46 +366,6 @@
         .history-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.12);
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-
-        .status-processing {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-failed {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         .toast {
@@ -392,10 +405,13 @@
             padding: 20px;
             background: linear-gradient(135deg, #f8f9ff 0%, #e8e9ff 100%);
             border-radius: 15px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .stat-item {
             text-align: center;
+            min-width: 150px;
         }
 
         .stat-value {
@@ -409,13 +425,27 @@
             color: #666;
             margin-top: 5px;
         }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .nutrition-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .requirements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🍎 Food Recognition Tracker</h1>
-            <p>Enhanced UX with Real-time Background Processing</p>
+            <p>AI-Powered Food Detection & Nutrition Analysis</p>
         </div>
 
         <div class="card">
@@ -426,13 +456,7 @@
                 <input type="file" id="fileInput" class="file-input" accept="image/*">
             </div>
 
-            <div class="api-selector">
-                <button class="api-button active" data-api="nutrition">Nutrition API</button>
-                <button class="api-button" data-api="spoonacular">Spoonacular</button>
-                <button class="api-button" data-api="bodyrequirements">Body Requirements</button>
-            </div>
-
-            <div style="text-align: center; margin-top: 20px;">
+            <div style="text-align: center;">
                 <button class="analyze-button" id="analyzeBtn" disabled>
                     Analyze Food
                 </button>
@@ -453,6 +477,56 @@
             <div class="card">
                 <div class="result-card" id="resultCard">
                     <!-- Results will be populated here -->
+                </div>
+
+                <div class="body-requirements-section">
+                    <h3>🎯 Daily Nutritional Requirements</h3>
+                    <p style="color: #666; margin-bottom: 15px;">
+                        Recommended daily intake for an average adult (2000-2500 calorie diet)
+                    </p>
+                    
+                    <div class="requirements-grid">
+                        <div class="requirement-item">
+                            <div class="requirement-label">Calories</div>
+                            <div class="requirement-value">2000-2500</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">kcal/day</div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="requirement-label">Protein</div>
+                            <div class="requirement-value">50-70</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">grams/day</div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="requirement-label">Fat</div>
+                            <div class="requirement-value">65-80</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">grams/day</div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="requirement-label">Carbs</div>
+                            <div class="requirement-value">225-325</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">grams/day</div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="requirement-label">Fiber</div>
+                            <div class="requirement-value">25-30</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">grams/day</div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="requirement-label">Sugar</div>
+                            <div class="requirement-value">&lt; 50</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">grams/day (max)</div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="requirement-label">Sodium</div>
+                            <div class="requirement-value">&lt; 2300</div>
+                            <div style="font-size: 0.8em; color: #999; margin-top: 5px;">mg/day (max)</div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-bar" id="comparisonBar" style="display: none;">
+                        <h4 style="margin-bottom: 15px; color: #333;">📊 How This Food Compares</h4>
+                        <div id="comparisonContent"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -487,7 +561,6 @@
 
     <script>
         let selectedFile = null;
-        let selectedApi = 'nutrition';
         let currentJobId = null;
         let pollingInterval = null;
 
@@ -501,6 +574,8 @@
         const resultsSection = document.getElementById('resultsSection');
         const resultCard = document.getElementById('resultCard');
         const historyGrid = document.getElementById('historyGrid');
+        const comparisonBar = document.getElementById('comparisonBar');
+        const comparisonContent = document.getElementById('comparisonContent');
 
         // Upload section click
         uploadSection.addEventListener('click', () => fileInput.click());
@@ -542,15 +617,6 @@
             }
         });
 
-        // API selector
-        document.querySelectorAll('.api-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.api-button').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedApi = btn.dataset.api;
-            });
-        });
-
         // Analyze button
         analyzeBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
@@ -561,7 +627,6 @@
 
             const formData = new FormData();
             formData.append('image', selectedFile);
-            formData.append('api', selectedApi);
 
             try {
                 const response = await fetch('/analyze', {
@@ -572,17 +637,15 @@
                 const data = await response.json();
 
                 if (response.status === 202) {
-                    // Async processing - poll for status
                     currentJobId = data.job_id;
-                    showToast('Analysis started! Tracking progress...');
+                    showToast('🔍 Analysis started! Detecting food...');
                     startPolling(currentJobId);
                 } else {
-                    // Synchronous result
                     displayResults(data);
                     progressContainer.classList.remove('active');
                 }
             } catch (error) {
-                showToast('Error: ' + error.message, 'error');
+                showToast('❌ Error: ' + error.message);
                 progressContainer.classList.remove('active');
                 analyzeBtn.disabled = false;
             }
@@ -607,22 +670,22 @@
                         clearInterval(pollingInterval);
                         displayResults(jobData.result);
                         progressContainer.classList.remove('active');
-                        showToast('Analysis completed!', 'success');
+                        showToast('✅ Analysis completed!');
                         analyzeBtn.disabled = false;
                         loadHistory();
                     } else if (jobData.status === 'failed') {
                         clearInterval(pollingInterval);
-                        showToast('Analysis failed: ' + jobData.error, 'error');
+                        showToast('❌ Analysis failed: ' + jobData.error);
                         progressContainer.classList.remove('active');
                         analyzeBtn.disabled = false;
                     }
                 } catch (error) {
                     clearInterval(pollingInterval);
-                    showToast('Error checking status', 'error');
+                    showToast('❌ Error checking status');
                     progressContainer.classList.remove('active');
                     analyzeBtn.disabled = false;
                 }
-            }, 500); // Poll every 500ms
+            }, 500);
         }
 
         function updateProgress(percent, message, emoji = '⚙️') {
@@ -653,10 +716,17 @@
 
             const nutrition = data.nutrition;
             const healthScore = nutrition.health_score || 75;
+            const confidence = data.detection?.confidence_percent || 0;
+            const method = data.detection?.method || 'unknown';
 
             resultCard.innerHTML = `
                 <div class="result-header">
-                    <div class="food-name">${data.food_name}</div>
+                    <div>
+                        <div class="food-name">${data.food_name}</div>
+                        <div class="detection-info">
+                            Confidence: ${confidence}% | Method: ${method}
+                        </div>
+                    </div>
                     <div class="health-badge ${healthBadgeClass}">${data.health_rating}</div>
                 </div>
 
@@ -699,10 +769,81 @@
                 </div>
             `;
 
+            // Show comparison
+            displayComparison(nutrition);
+
             resultsSection.classList.add('active');
         }
 
-        function showToast(message, type = 'info') {
+        function displayComparison(nutrition) {
+            const comparisons = [
+                { 
+                    label: 'Calories', 
+                    value: nutrition.calories, 
+                    max: 2250, 
+                    unit: 'kcal',
+                    dailyPercent: ((nutrition.calories / 2250) * 100).toFixed(1)
+                },
+                { 
+                    label: 'Protein', 
+                    value: nutrition.protein, 
+                    max: 60, 
+                    unit: 'g',
+                    dailyPercent: ((nutrition.protein / 60) * 100).toFixed(1)
+                },
+                { 
+                    label: 'Fat', 
+                    value: nutrition.fat, 
+                    max: 72, 
+                    unit: 'g',
+                    dailyPercent: ((nutrition.fat / 72) * 100).toFixed(1)
+                },
+                { 
+                    label: 'Carbs', 
+                    value: nutrition.carbs, 
+                    max: 275, 
+                    unit: 'g',
+                    dailyPercent: ((nutrition.carbs / 275) * 100).toFixed(1)
+                },
+                { 
+                    label: 'Sugar', 
+                    value: nutrition.sugar, 
+                    max: 50, 
+                    unit: 'g',
+                    dailyPercent: ((nutrition.sugar / 50) * 100).toFixed(1)
+                },
+                { 
+                    label: 'Sodium', 
+                    value: nutrition.sodium, 
+                    max: 2300, 
+                    unit: 'mg',
+                    dailyPercent: ((nutrition.sodium / 2300) * 100).toFixed(1)
+                }
+            ];
+
+            let comparisonHTML = '';
+            comparisons.forEach(comp => {
+                const percentage = Math.min((comp.value / comp.max) * 100, 100);
+                const color = percentage > 80 ? '#f44336' : percentage > 50 ? '#ff9800' : '#4caf50';
+                
+                comparisonHTML += `
+                    <div class="comparison-item">
+                        <div class="comparison-label">
+                            <span>${comp.label}: ${comp.value}${comp.unit}</span>
+                            <span>${comp.dailyPercent}% of daily value</span>
+                        </div>
+                        <div class="comparison-bar-bg">
+                            <div class="comparison-bar-fill" style="width: ${percentage}%; background: ${color};"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            comparisonContent.innerHTML = comparisonHTML;
+            comparisonBar.style.display = 'block';
+        }
+
+        function showToast(message) {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
             toastMessage.textContent = message;
