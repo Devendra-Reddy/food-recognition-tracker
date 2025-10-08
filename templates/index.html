@@ -672,7 +672,9 @@
                         progressContainer.classList.remove('active');
                         showToast('✅ Analysis completed!');
                         analyzeBtn.disabled = false;
-                        loadHistory();
+                        
+                        // Refresh history immediately
+                        setTimeout(() => loadHistory(), 500);
                     } else if (jobData.status === 'failed') {
                         clearInterval(pollingInterval);
                         showToast('❌ Analysis failed: ' + jobData.error);
@@ -856,37 +858,57 @@
                 const response = await fetch('/history');
                 const data = await response.json();
 
+                console.log('History data:', data); // Debug log
+
                 // Update stats
                 const analytics = data.analytics;
-                document.getElementById('totalScans').textContent = analytics.total_scans;
+                document.getElementById('totalScans').textContent = analytics.total_scans || 0;
                 document.getElementById('healthyChoices').textContent = 
                     analytics.total_scans > 0 
                     ? Math.round((analytics.healthy_choices / analytics.total_scans) * 100) + '%'
                     : '0%';
-                document.getElementById('avgCalories').textContent = Math.round(analytics.average_calories);
+                document.getElementById('avgCalories').textContent = Math.round(analytics.average_calories || 0);
 
                 // Display history
-                historyGrid.innerHTML = data.results.map(item => `
-                    <div class="history-item">
-                        <h3>${item.food_name}</h3>
-                        <p style="color: #666; font-size: 0.9em; margin: 5px 0;">
-                            ${new Date(item.timestamp).toLocaleDateString()}
-                        </p>
-                        <p style="margin: 10px 0;">
-                            <strong>${item.nutrition.calories}</strong> calories
-                        </p>
-                        <div class="health-badge ${
-                            item.health_rating.includes('Excellent') ? 'badge-excellent' :
-                            item.health_rating.includes('Good') ? 'badge-good' :
-                            item.health_rating.includes('Moderate') ? 'badge-moderate' :
-                            'badge-limit'
-                        }" style="display: inline-block;">
-                            ${item.health_rating}
+                if (data.results && data.results.length > 0) {
+                    historyGrid.innerHTML = data.results.map(item => {
+                        const healthRating = item.health_rating || 'Moderate';
+                        const badgeClass = 
+                            healthRating.includes('Excellent') ? 'badge-excellent' :
+                            healthRating.includes('Good') ? 'badge-good' :
+                            healthRating.includes('Moderate') ? 'badge-moderate' :
+                            'badge-limit';
+                        
+                        return `
+                            <div class="history-item">
+                                <h3>${item.food_name || 'Unknown Food'}</h3>
+                                <p style="color: #666; font-size: 0.9em; margin: 5px 0;">
+                                    ${item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Just now'}
+                                </p>
+                                <p style="margin: 10px 0;">
+                                    <strong>${item.nutrition?.calories || 0}</strong> calories
+                                </p>
+                                <div class="health-badge ${badgeClass}" style="display: inline-block; margin-top: 10px;">
+                                    ${healthRating}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    historyGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+                            <p style="font-size: 3em; margin-bottom: 10px;">📊</p>
+                            <p>No scans yet. Upload a food image to get started!</p>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }
             } catch (error) {
                 console.error('Error loading history:', error);
+                historyGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #f44336;">
+                        <p>Error loading history. Please refresh the page.</p>
+                    </div>
+                `;
             }
         }
 
