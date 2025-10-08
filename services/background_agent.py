@@ -11,7 +11,6 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, Callable, Optional
 from enum import Enum
-import json
 
 
 class JobStatus(Enum):
@@ -301,81 +300,3 @@ def shutdown_agent():
     if _agent_instance:
         _agent_instance.stop()
         _agent_instance = None
-
-
-# Example job handlers for testing
-def example_image_processing_handler(data: Dict[str, Any], progress_callback: Callable):
-    """Example handler for image processing"""
-    image_path = data.get('image_path')
-    
-    progress_callback(10, {'stage': 'loading_image'})
-    time.sleep(0.5)  # Simulate loading
-    
-    progress_callback(30, {'stage': 'detecting_food'})
-    time.sleep(1)  # Simulate detection
-    
-    progress_callback(60, {'stage': 'fetching_nutrition'})
-    time.sleep(0.5)  # Simulate API call
-    
-    progress_callback(90, {'stage': 'analyzing_health'})
-    time.sleep(0.3)  # Simulate analysis
-    
-    progress_callback(100, {'stage': 'completed'})
-    
-    return {
-        'food_name': 'Apple',
-        'confidence': 0.95,
-        'nutrition': {'calories': 95, 'protein': 0.5}
-    }
-
-
-# Test function
-if __name__ == "__main__":
-    print("🧪 Testing Background Agent System\n")
-    
-    # Create agent
-    agent = BackgroundAgent(num_workers=2)
-    
-    # Register handler
-    agent.register_handler('image_processing', example_image_processing_handler)
-    
-    # Start agent
-    agent.start()
-    
-    # Submit jobs
-    job_ids = []
-    for i in range(5):
-        job_id = agent.submit_job(
-            'image_processing',
-            {'image_path': f'/path/to/image{i}.jpg'},
-            callback=lambda j: print(f"🎉 Callback: Job {j.job_id[:8]} completed!")
-        )
-        job_ids.append(job_id)
-    
-    # Monitor jobs
-    print("\n📊 Monitoring jobs...")
-    time.sleep(1)
-    
-    for _ in range(10):
-        time.sleep(1)
-        stats = agent.get_stats()
-        print(f"Stats: {stats}")
-        
-        # Check if all jobs are done
-        all_done = all(
-            agent.get_job_status(jid)['status'] in ['completed', 'failed']
-            for jid in job_ids
-        )
-        
-        if all_done:
-            break
-    
-    # Show final results
-    print("\n📋 Final Results:")
-    for job_id in job_ids:
-        status = agent.get_job_status(job_id)
-        print(f"Job {job_id[:8]}: {status['status']} - {status.get('result')}")
-    
-    # Stop agent
-    agent.stop()
-    print("\n✅ Test completed!")
