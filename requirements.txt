@@ -4,3 +4,17 @@ python-dotenv==1.0.0
 requests==2.31.0
 Werkzeug==2.3.7
 gunicorn==21.2.0
+# Optional: LangChain dependencies for future upgrades
+# The current agent works WITHOUT these dependencies
+# Install only if you want to upgrade to full LangChain agent
+
+# langchain==0.1.0
+# langchain-community==0.0.10
+# langchain-core==0.1.10
+
+# For future AI-powered agent upgrades:
+# openai==1.6.1
+# anthropic==0.8.1
+
+# Current agent requires NO additional dependencies!
+# It works with your existing Flask setup.
