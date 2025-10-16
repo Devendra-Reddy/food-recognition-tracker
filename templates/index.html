@@ -915,5 +915,608 @@
         // Load history on page load
         loadHistory();
     </script>
+    <!-- Add this right before closing </body> tag in index.html -->
+
+<!-- Chat Assistant Widget -->
+<div id="chatWidget" class="chat-widget">
+    <button id="chatToggle" class="chat-toggle">
+        <span class="chat-icon">💬</span>
+        <span class="chat-badge" id="chatBadge">1</span>
+    </button>
+    
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <span class="chat-avatar">🤖</span>
+                <div class="chat-header-text">
+                    <h3>FoodTracker Assistant</h3>
+                    <p class="chat-status">Online • Here to help</p>
+                </div>
+            </div>
+            <button id="chatClose" class="chat-close-btn">×</button>
+        </div>
+        
+        <div id="chatMessages" class="chat-messages">
+            <div class="chat-message bot-message">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <p>Hi! I'm your FoodTracker assistant. How can I help you today?</p>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" data-action="how-to-use">📖 How to use</button>
+                        <button class="quick-action-btn" data-action="upload-help">📸 Upload help</button>
+                        <button class="quick-action-btn" data-action="nutrition-info">🥗 Nutrition info</button>
+                        <button class="quick-action-btn" data-action="accuracy">🎯 Accuracy tips</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <input 
+                type="text" 
+                id="chatInput" 
+                class="chat-input" 
+                placeholder="Type your question..."
+                autocomplete="off"
+            />
+            <button id="chatSend" class="chat-send-btn">
+                <span>➤</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Chat Widget Styles */
+.chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.chat-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.chat-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.chat-icon {
+    font-size: 28px;
+}
+
+.chat-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #f44336;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.chat-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 380px;
+    height: 550px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+.chat-window.active {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-avatar {
+    font-size: 32px;
+}
+
+.chat-header-text h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chat-status {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.chat-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.chat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f8f9fa;
+}
+
+.chat-message {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    animation: messageSlide 0.3s ease;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-avatar {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.message-content {
+    flex: 1;
+}
+
+.bot-message .message-content p {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px 12px 12px 4px;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.user-message {
+    flex-direction: row-reverse;
+}
+
+.user-message .message-content p {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px 12px 4px 12px;
+    margin: 0;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.quick-action-btn {
+    background: white;
+    border: 2px solid #e1e8ff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.quick-action-btn:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: white;
+    border-top: 1px solid #e1e8ed;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e1e8ed;
+    border-radius: 24px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.chat-input:focus {
+    border-color: #667eea;
+}
+
+.chat-send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.chat-send-btn:hover {
+    transform: scale(1.1);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 12px;
+    width: fit-content;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #667eea;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+    .chat-window {
+        width: calc(100vw - 40px);
+        height: calc(100vh - 120px);
+        bottom: 80px;
+        right: 20px;
+    }
+}
+
+/* Scrollbar styling */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
+}
+</style>
+
+<script>
+// Chat Assistant Logic
+class ChatAssistant {
+    constructor() {
+        this.isOpen = false;
+        this.chatHistory = [];
+        
+        this.responses = {
+            'how-to-use': {
+                title: 'How to Use FoodTracker',
+                message: `Here's how to use the app:\n\n1. 📸 Click or drag-drop a food image\n2. 🔍 Click "Analyze Food" button\n3. ⏱️ Wait for AI detection (15-30 seconds)\n4. 📊 View nutrition info and health score\n5. 📈 Check your history and analytics\n\nTip: Take clear, well-lit photos for best results!`
+            },
+            'upload-help': {
+                title: 'Upload Tips',
+                message: `For best results:\n\n✅ Use clear, well-lit photos\n✅ Center the food in frame\n✅ Avoid blurry or dark images\n✅ Supported: JPG, PNG, WEBP, GIF\n✅ Max size: 16MB\n\n📸 Pro tip: Natural lighting works best!`
+            },
+            'nutrition-info': {
+                title: 'Nutrition Information',
+                message: `Our app provides:\n\n🔥 Calories per serving\n💪 Protein content\n🌾 Carbohydrates\n⛽ Fat content\n🌿 Fiber\n🍬 Sugar\n🧂 Sodium\n\n Plus daily value comparisons and health recommendations!`
+            },
+            'accuracy': {
+                title: 'Accuracy Tips',
+                message: `To get accurate detection:\n\n1. Use the actual food name in your image\n2. Avoid complex mixed dishes\n3. Take photos from above\n4. Good lighting is essential\n5. One food item works best\n\nConfidence above 70% is excellent!`
+            },
+            'greeting': [
+                "Hello! How can I assist you with FoodTracker today?",
+                "Hi there! Need help with food analysis?",
+                "Hey! What can I help you with?"
+            ],
+            'help': "I can help you with:\n\n• How to use the app\n• Upload and photo tips\n• Understanding nutrition data\n• Accuracy and detection\n• Technical support\n\nWhat would you like to know?",
+            'thanks': [
+                "You're welcome! Anything else I can help with?",
+                "Happy to help! Feel free to ask more questions.",
+                "Glad I could help! Let me know if you need anything else."
+            ],
+            'default': "I'm here to help! Try asking about:\n\n• How to upload images\n• Understanding nutrition info\n• Improving detection accuracy\n• App features\n\nOr click the quick action buttons above!"
+        };
+        
+        this.init();
+    }
+    
+    init() {
+        // Get elements
+        this.chatToggle = document.getElementById('chatToggle');
+        this.chatWindow = document.getElementById('chatWindow');
+        this.chatClose = document.getElementById('chatClose');
+        this.chatMessages = document.getElementById('chatMessages');
+        this.chatInput = document.getElementById('chatInput');
+        this.chatSend = document.getElementById('chatSend');
+        this.chatBadge = document.getElementById('chatBadge');
+        
+        // Bind events
+        this.chatToggle.addEventListener('click', () => this.toggleChat());
+        this.chatClose.addEventListener('click', () => this.closeChat());
+        this.chatSend.addEventListener('click', () => this.sendMessage());
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+        
+        // Quick actions
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('quick-action-btn')) {
+                const action = e.target.dataset.action;
+                this.handleQuickAction(action);
+            }
+        });
+        
+        // Hide badge after first open
+        this.firstOpen = true;
+    }
+    
+    toggleChat() {
+        this.isOpen = !this.isOpen;
+        this.chatWindow.classList.toggle('active');
+        
+        if (this.isOpen && this.firstOpen) {
+            this.chatBadge.style.display = 'none';
+            this.firstOpen = false;
+        }
+        
+        if (this.isOpen) {
+            this.chatInput.focus();
+        }
+    }
+    
+    closeChat() {
+        this.isOpen = false;
+        this.chatWindow.classList.remove('active');
+    }
+    
+    sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        this.addMessage(message, 'user');
+        this.chatInput.value = '';
+        
+        // Show typing indicator
+        this.showTyping();
+        
+        // Get response
+        setTimeout(() => {
+            this.hideTyping();
+            const response = this.getResponse(message);
+            this.addMessage(response, 'bot');
+        }, 1000);
+    }
+    
+    addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chat-message ${sender}-message`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = sender === 'user' ? '👤' : '🤖';
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        
+        const p = document.createElement('p');
+        p.textContent = text;
+        p.style.whiteSpace = 'pre-line';
+        
+        content.appendChild(p);
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+        
+        this.chatHistory.push({ text, sender, timestamp: new Date() });
+    }
+    
+    showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'chat-message bot-message';
+        typingDiv.id = 'typing-indicator';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = '🤖';
+        
+        const indicator = document.createElement('div');
+        indicator.className = 'typing-indicator';
+        indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        
+        typingDiv.appendChild(avatar);
+        typingDiv.appendChild(indicator);
+        this.chatMessages.appendChild(typingDiv);
+        this.scrollToBottom();
+    }
+    
+    hideTyping() {
+        const typing = document.getElementById('typing-indicator');
+        if (typing) typing.remove();
+    }
+    
+    getResponse(message) {
+        const msg = message.toLowerCase();
+        
+        // Greetings
+        if (msg.match(/^(hi|hello|hey|greetings)/)) {
+            return this.randomResponse(this.responses.greeting);
+        }
+        
+        // Thanks
+        if (msg.match(/(thank|thanks|thx)/)) {
+            return this.randomResponse(this.responses.thanks);
+        }
+        
+        // Help
+        if (msg.match(/(help|assist|support)/)) {
+            return this.responses.help;
+        }
+        
+        // Upload issues
+        if (msg.match(/(upload|image|photo|picture)/)) {
+            return this.responses['upload-help'].message;
+        }
+        
+        // Nutrition
+        if (msg.match(/(nutrition|calorie|protein|vitamin)/)) {
+            return this.responses['nutrition-info'].message;
+        }
+        
+        // Accuracy
+        if (msg.match(/(accuracy|accurate|detection|detect|wrong)/)) {
+            return this.responses['accuracy'].message;
+        }
+        
+        // How to use
+        if (msg.match(/(how|use|work|start)/)) {
+            return this.responses['how-to-use'].message;
+        }
+        
+        // Error handling
+        if (msg.match(/(error|problem|issue|bug|broken|not working)/)) {
+            return "I'm sorry you're experiencing issues! Common solutions:\n\n1. Refresh the page\n2. Check your internet connection\n3. Try a different image\n4. Clear browser cache\n\nStill having trouble? Please contact support@foodtracker.com";
+        }
+        
+        // API/Technical
+        if (msg.match(/(api|roboflow|backend|server)/)) {
+            return "Our app uses Roboflow AI for food detection! The analysis typically takes 15-30 seconds. If it's taking longer, please:\n\n• Check your connection\n• Try a smaller image\n• Refresh and try again";
+        }
+        
+        // History
+        if (msg.match(/(history|past|previous|record)/)) {
+            return "Your scan history is saved automatically! Scroll down to the 'Analytics & History' section to see:\n\n📊 Total scans\n🥗 Healthy choices %\n🔥 Average calories\n📅 Past food scans";
+        }
+        
+        // Default
+        return this.responses.default;
+    }
+    
+    handleQuickAction(action) {
+        const response = this.responses[action];
+        if (response) {
+            this.addMessage(response.message, 'bot');
+        }
+    }
+    
+    randomResponse(responses) {
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    
+    scrollToBottom() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+}
+
+// Initialize chat assistant
+document.addEventListener('DOMContentLoaded', () => {
+    window.chatAssistant = new ChatAssistant();
+});
+</script>
 </body>
 </html>
+
