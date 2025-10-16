@@ -14,7 +14,169 @@ import time
 
 # Load environment variables
 load_dotenv()
+# Add these imports at the top of app.py
+try:
+    from services.chat_support import get_chat_support
+    CHAT_SUPPORT_ENABLED = True
+except ImportError:
+    CHAT_SUPPORT_ENABLED = False
+    print("⚠️ Chat support not available")
 
+# Add this after other initializations
+if CHAT_SUPPORT_ENABLED:
+    chat_support = get_chat_support()
+    print("✅ Chat support initialized")
+else:
+    chat_support = None
+
+# Add these routes before if __name__ == "__main__":
+
+@app.route("/api/chat/message", methods=["POST"])
+def chat_message():
+    """Handle chat message from user"""
+    try:
+        data = request.json
+        user_message = data.get("message", "")
+        session_id = data.get("session_id")
+        
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
+        
+        if CHAT_SUPPORT_ENABLED:
+            # Get intelligent response
+            response = chat_support.get_support_response(user_message)
+            
+            # Log interaction
+            chat_support.log_chat_interaction(
+                user_message, 
+                response.get("message", ""),
+                session_id
+            )
+            
+            return jsonify({
+                "success": True,
+                "response": response,
+                "timestamp": datetime.now().isoformat()
+            })
+        else:
+            # Simple fallback response
+            return jsonify({
+                "success": True,
+                "response": {
+                    "type": "general",
+                    "message": "I'm here to help! Please try the quick action buttons or contact support@foodtracker.com"
+                }
+            })
+        
+    except Exception as e:
+        print(f"Chat error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/chat/faq", methods=["GET"])
+def get_faq():
+    """Get FAQ list"""
+    try:
+        if CHAT_SUPPORT_ENABLED:
+            faq_list = [
+                {
+                    "id": faq_id,
+                    "question": faq_data["question"],
+                    "answer": faq_data["answer"],
+                    "category": faq_data["category"]
+                }
+                for faq_id, faq_data in chat_support.faq_database.items()
+            ]
+            return jsonify({"faqs": faq_list})
+        else:
+            return jsonify({"faqs": []})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/chat/search", methods=["POST"])
+def search_faq():
+    """Search FAQ"""
+    try:
+        data = request.json
+        query = data.get("query", "")
+        
+        if not query:
+            return jsonify({"error": "No query provided"}), 400
+        
+        if CHAT_SUPPORT_ENABLED:
+            results = chat_support.search_faq(query)
+            return jsonify({
+                "success": True,
+                "results": results,
+                "count": len(results)
+            })
+        else:
+            return jsonify({"success": False, "results": []})
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/chat/support-ticket", methods=["POST"])
+def create_support_ticket():
+    """Create support ticket"""
+    try:
+        data = request.json
+        message = data.get("message", "")
+        email = data.get("email")
+        
+        if not message:
+            return jsonify({"error": "No message provided"}), 400
+        
+        if CHAT_SUPPORT_ENABLED:
+            ticket_id = chat_support.create_support_ticket(message, email)
+            return jsonify({
+                "success": True,
+                "ticket_id": ticket_id,
+                "message": f"Support ticket #{ticket_id} created successfully. We'll respond within 24 hours."
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Support tickets are currently unavailable. Please email support@foodtracker.com"
+            }), 503
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/chat/analytics", methods=["GET"])
+def get_chat_analytics():
+    """Get chat analytics (admin only)"""
+    try:
+        if CHAT_SUPPORT_ENABLED:
+            analytics = chat_support.get_analytics()
+            return jsonify(analytics)
+        else:
+            return jsonify({"error": "Chat analytics not available"}), 503
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/chat/quick-replies", methods=["GET"])
+def get_quick_replies():
+    """Get quick reply suggestions"""
+    try:
+        if CHAT_SUPPORT_ENABLED:
+            replies = chat_support.get_quick_replies()
+            return jsonify({"quick_replies": replies})
+        else:
+            # Default quick replies
+            replies = [
+                {"id": "how_to_use", "text": "📖 How to use", "action": "how-to-use"},
+                {"id": "upload_help", "text": "📸 Upload help", "action": "upload-help"},
+                {"id": "nutrition_info", "text": "🥗 Nutrition info", "action": "nutrition-info"},
+                {"id": "accuracy_tips", "text": "🎯 Accuracy tips", "action": "accuracy"}
+            ]
+            return jsonify({"quick_replies": replies})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 # Flask setup
 app = Flask(__name__)
 CORS(app)
