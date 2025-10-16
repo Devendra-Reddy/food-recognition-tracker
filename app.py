@@ -14,6 +14,170 @@ import time
 
 # Load environment variables
 load_dotenv()
+# Add this import at the top of app.py
+try:
+    from services.agent import get_nutrition_agent
+    AGENT_ENABLED = True
+except ImportError:
+    AGENT_ENABLED = False
+    print("⚠️ Agent not available")
+
+# Add this after other initializations
+if AGENT_ENABLED:
+    nutrition_agent = get_nutrition_agent()
+    print("✅ Nutrition validation agent initialized")
+else:
+    nutrition_agent = None
+
+# Update the process_food_analysis function to use the agent
+# Replace the existing function with this updated version:
+
+def process_food_analysis(data, progress_callback):
+    """Process food analysis with AI agent validation"""
+    try:
+        filepath = data['filepath']
+        
+        # Stage 1: Real-time food detection (0-50%)
+        progress_callback(5, {'stage': 'detecting_food', 'message': 'Analyzing image with AI...'})
+        
+        if REALTIME_ANALYSIS_ENABLED:
+            detection_result = realtime_analyzer.analyze(filepath, progress_callback)
+            detected_food = detection_result['detection']['food_name']
+            confidence = detection_result['detection']['confidence_percent']
+            detection_method = detection_result['detection']['method']
+            alternatives = detection_result['detection'].get('alternatives', [])
+            multiple_items = detection_result.get('multiple_items', [])
+            
+            progress_callback(50, {
+                'stage': 'food_detected', 
+                'message': f'Detected: {detected_food.title()} ({confidence}% confidence)'
+            })
+        else:
+            detected_food = detect_food_simple(filepath)
+            confidence = 75
+            detection_method = 'fallback'
+            alternatives = []
+            multiple_items = []
+            
+            progress_callback(50, {'stage': 'food_detected', 'message': f'Detected: {detected_food.title()}'})
+        
+        # Stage 2: Get nutrition data (50-70%)
+        progress_callback(60, {'stage': 'fetching_nutrition', 'message': 'Getting nutrition data...'})
+        nutrition_data = get_nutrition_data(detected_food)
+        
+        # Stage 2.5: AGENT VALIDATION (NEW!) (70-75%)
+        progress_callback(70, {'stage': 'agent_validation', 'message': '🤖 Agent validating nutrition data...'})
+        
+        if AGENT_ENABLED:
+            # Use agent to validate and refine nutrition data
+            nutrition_data = nutrition_agent.validate_and_refine(detected_food, nutrition_data)
+            print(f"🤖 Agent validated with {nutrition_data.get('agent_confidence', 0)}% confidence")
+        
+        # Add detection metadata
+        nutrition_data['detection_confidence'] = confidence
+        nutrition_data['detection_method'] = detection_method
+        nutrition_data['alternatives'] = alternatives
+        
+        # Stage 3: Health analysis (75-95%)
+        progress_callback(80, {'stage': 'analyzing_health', 'message': 'Analyzing health impact...'})
+        health_rating, recommendation = evaluate_food_health(nutrition_data)
+        health_score = calculate_health_score(nutrition_data)
+        
+        # Use agent recommendation if available
+        if AGENT_ENABLED and 'agent_insights' in nutrition_data:
+            agent_recommendation = nutrition_agent.generate_recommendation(nutrition_data)
+            recommendation = f"{recommendation}\n\n🤖 Agent Insight: {agent_recommendation}"
+        
+        # Get food category and recommendation
+        food_category = nutrition_data.get('category', 'moderate')
+        is_recommended = food_category in ['healthy', 'moderate']
+        
+        # Stage 4: Finalize (95-100%)
+        progress_callback(95, {'stage': 'finalizing', 'message': 'Preparing results...'})
+        
+        result = {
+            "id": str(uuid.uuid4()),
+            "food_name": detected_food.title(),
+            "detection": {
+                "confidence": confidence,
+                "confidence_percent": confidence,
+                "method": detection_method,
+                "alternatives": alternatives,
+                "multiple_items": multiple_items
+            },
+            "nutrition": {
+                **nutrition_data,
+                "health_score": health_score
+            },
+            "health_rating": health_rating,
+            "recommendation": recommendation,
+            "portion_suggestion": generate_portion_suggestion(detected_food, nutrition_data),
+            "food_category": food_category,
+            "is_recommended": is_recommended,
+            "category_label": get_category_label(food_category),
+            "timestamp": datetime.now().isoformat(),
+            # Add agent metadata
+            "agent_validated": AGENT_ENABLED,
+            "agent_confidence": nutrition_data.get('agent_confidence', None) if AGENT_ENABLED else None
+        }
+        
+        # Save result
+        results_store.append(result)
+        update_user_analytics(detected_food, nutrition_data, health_rating, food_category)
+        
+        # Clean up file
+        try:
+            os.remove(filepath)
+        except:
+            pass
+        
+        progress_callback(100, {'stage': 'completed', 'message': 'Analysis complete!'})
+        
+        return result
+        
+    except Exception as e:
+        raise Exception(f"Analysis failed: {str(e)}")
+
+
+# Add new endpoint to test agent
+@app.route("/api/agent/validate", methods=["POST"])
+def validate_nutrition():
+    """Test endpoint for agent validation"""
+    try:
+        data = request.json
+        food_name = data.get("food_name", "unknown")
+        nutrition_data = data.get("nutrition", {})
+        
+        if not AGENT_ENABLED:
+            return jsonify({"error": "Agent not available"}), 503
+        
+        validated = nutrition_agent.validate_and_refine(food_name, nutrition_data)
+        
+        return jsonify({
+            "success": True,
+            "validated_data": validated,
+            "agent_confidence": validated.get('agent_confidence', 0)
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/agent/status", methods=["GET"])
+def agent_status():
+    """Check agent status"""
+    return jsonify({
+        "agent_enabled": AGENT_ENABLED,
+        "agent_type": "NutritionValidationAgent",
+        "features": [
+            "Data validation",
+            "Range checking",
+            "Auto-categorization",
+            "Health insights",
+            "Anomaly detection",
+            "Confidence scoring"
+        ] if AGENT_ENABLED else []
+    })
 # Add these imports at the top of app.py
 try:
     from services.chat_support import get_chat_support
