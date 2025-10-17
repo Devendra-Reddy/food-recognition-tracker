@@ -31,6 +31,14 @@ food-recognition-tracker/
 Create `services/background_agent.py`:
 ```bash
 # Copy the "Enhanced Background Agent System" artifact content
+Before Agent:
+Food → Detect → Nutrition → Display
+
+After Agent:
+Food → Detect → Nutrition → 🤖 AGENT VALIDATES → Display
+                              ↑
+                    Checks data, adds insights,
+                    scores confidence, detects issues
 ```
 
 ### Step 2: Update Flask App
