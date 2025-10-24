@@ -15,7 +15,11 @@ import time
 # Load environment variables
 load_dotenv()
 
+@app.route('/agent-dashboard')
+def agent_dashboard():
+    return render_template('agent_dashboard.html')
 # Import agent services first
+
 try:
     from services.agent import get_nutrition_agent
     AGENT_ENABLED = True
