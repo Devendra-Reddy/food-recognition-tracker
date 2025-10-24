@@ -15,11 +15,7 @@ import time
 # Load environment variables
 load_dotenv()
 
-@app.route('/agent-dashboard')
-def agent_dashboard():
-    return render_template('agent_dashboard.html')
 # Import agent services first
-
 try:
     from services.agent import get_nutrition_agent
     AGENT_ENABLED = True
@@ -415,11 +411,16 @@ def process_food_analysis(data, progress_callback):
 if BACKGROUND_AGENT_ENABLED:
     background_agent.register_handler('food_analysis', process_food_analysis)
 
-# ===== ROUTES START HERE =====
+# ===== ROUTES START HERE (AFTER app is created) =====
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route('/agent-dashboard')
+def agent_dashboard():
+    """Agent dashboard route"""
+    return render_template('agent_dashboard.html')
 
 @app.route("/api/status", methods=["GET"])
 def api_status():
@@ -709,6 +710,7 @@ if __name__ == "__main__":
     print("✅ Accurate food classification")
     print("✅ Health recommendations & body requirements")
     print("✅ Background processing enabled")
+    print("✅ Agent Dashboard available at /agent-dashboard")
     print("🔗 Visit: http://localhost:5000")
     
     try:
