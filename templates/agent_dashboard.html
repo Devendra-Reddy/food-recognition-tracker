@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Detection Agent Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Simple SVG Icon Components
+        const Play = ({ size = 20 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+        );
+        
+        const Pause = ({ size = 20 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+        );
+        
+        const CheckCircle = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        );
+        
+        const AlertCircle = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        );
+        
+        const TrendingUp = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+        );
+        
+        const Database = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+        );
+        
+        const Image = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+        );
+        
+        const BarChart3 = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 3v18h18"></path>
+                <path d="M18 17V9"></path>
+                <path d="M13 17V5"></path>
+                <path d="M8 17v-3"></path>
+            </svg>
+        );
+        
+        const Clock = ({ size = 24, className = "" }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+        );
+
+        const ProactiveDetectionAgent = () => {
+            const [isRunning, setIsRunning] = useState(false);
+            const [currentDay, setCurrentDay] = useState(1);
+            const [dailyReports, setDailyReports] = useState([]);
+            const [pendingActions, setPendingActions] = useState([]);
+            const [stats, setStats] = useState({
+                totalImages: 1250,
+                lowConfidence: 47,
+                syntheticGenerated: 0,
+                modelsEvaluated: 3,
+                accuracyImprovement: 0
+            });
+
+            const findLowConfidenceImages = () => {
+                const categories = ['dogs', 'humans', 'landscapes', 'portraits', 'abstract'];
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const count = Math.floor(Math.random() * 15) + 5;
+                const avgConfidence = (Math.random() * 0.2 + 0.3).toFixed(2);
+                
+                return {
+                    category,
+                    count,
+                    avgConfidence,
+                    imageIds: Array.from({length: count}, (_, i) => `img_${category}_${Date.now()}_${i}`)
+                };
+            };
+
+            const evaluateModels = () => {
+                const models = [
+                    { name: 'ResNet-50-Detector', accuracy: 0.82, bestFor: 'dogs' },
+                    { name: 'ViT-Large-Detector', accuracy: 0.89, bestFor: 'humans' },
+                    { name: 'EfficientNet-Detector', accuracy: 0.85, bestFor: 'landscapes' }
+                ];
+                
+                return models.map(m => ({
+                    ...m,
+                    accuracy: Math.min(0.95, m.accuracy + (Math.random() * 0.05))
+                }));
+            };
+
+            useEffect(() => {
+                if (!isRunning) return;
+
+                const runDailyRoutine = () => {
+                    const report = {
+                        day: currentDay,
+                        timestamp: new Date().toLocaleString(),
+                        activities: [],
+                        recommendations: []
+                    };
+
+                    const lowConfResults = findLowConfidenceImages();
+                    report.activities.push({
+                        type: 'scan',
+                        description: `🔍 Scanned ${stats.totalImages} images, found ${lowConfResults.count} low confidence (<0.5) in category: ${lowConfResults.category}`,
+                        details: `Average confidence: ${lowConfResults.avgConfidence}`
+                    });
+
+                    const syntheticCount = lowConfResults.count * 10;
+                    report.activities.push({
+                        type: 'generate',
+                        description: `🎨 Generated ${syntheticCount} synthetic ${lowConfResults.category} images similar to low-confidence samples`,
+                        details: `Images saved to training_candidates/${lowConfResults.category}/`
+                    });
+
+                    const action = {
+                        id: `action_day${currentDay}_${Date.now()}`,
+                        day: currentDay,
+                        type: 'label_review',
+                        category: lowConfResults.category,
+                        imageCount: syntheticCount,
+                        question: `I generated ${syntheticCount} synthetic ${lowConfResults.category} images and auto-labeled them. Should I add these to training data?`,
+                        options: ['Yes, add all', 'Show me samples first', 'No, regenerate different variations']
+                    };
+
+                    setPendingActions(prev => [...prev, action]);
+
+                    if (currentDay % 2 === 0) {
+                        const modelResults = evaluateModels();
+                        report.activities.push({
+                            type: 'evaluation',
+                            description: `📊 Evaluated 3 detection models on 20-image test batch`,
+                            details: modelResults.map(m => `${m.name}: ${(m.accuracy * 100).toFixed(1)}% (best for: ${m.bestFor})`).join('\n')
+                        });
+
+                        report.recommendations.push({
+                            type: 'routing',
+                            text: `Implement smart routing: ${modelResults[0].name} for ${modelResults[0].bestFor}, ${modelResults[1].name} for ${modelResults[1].bestFor}`
+                        });
+                    }
+
+                    if (lowConfResults.count > 10) {
+                        report.recommendations.push({
+                            type: 'training',
+                            text: `High volume of low-confidence ${lowConfResults.category} detected. Priority: augment training data in this category.`
+                        });
+                    }
+
+                    setStats(prev => ({
+                        ...prev,
+                        lowConfidence: Math.max(15, prev.lowConfidence - Math.floor(Math.random() * 8)),
+                        syntheticGenerated: prev.syntheticGenerated + syntheticCount,
+                        accuracyImprovement: prev.accuracyImprovement + (Math.random() * 2.5)
+                    }));
+
+                    setDailyReports(prev => [report, ...prev]);
+                    setCurrentDay(prev => prev + 1);
+                };
+
+                const timer = setTimeout(runDailyRoutine, 2000);
+                return () => clearTimeout(timer);
+            }, [isRunning, currentDay]);
+
+            const handleAction = (actionId, response) => {
+                setPendingActions(prev => prev.filter(a => a.id !== actionId));
+                
+                const action = pendingActions.find(a => a.id === actionId);
+                if (action && response === 'Yes, add all') {
+                    setStats(prev => ({
+                        ...prev,
+                        totalImages: prev.totalImages + action.imageCount
+                    }));
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-6 border border-white/20">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-white mb-2">
+                                        🤖 Autonomous Detection Agent
+                                    </h1>
+                                    <p className="text-purple-200">
+                                        Proactively improving AI image detection • Day {currentDay}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setIsRunning(!isRunning)}
+                                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                                        isRunning
+                                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                                            : 'bg-green-500 hover:bg-green-600 text-white'
+                                    }`}
+                                >
+                                    {isRunning ? (
+                                        <>
+                                            <Pause size={20} /> Pause Agent
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Play size={20} /> Start Agent
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                            <div className="bg-blue-500/20 backdrop-blur border border-blue-400/30 rounded-xl p-4">
+                                <Database size={24} className="text-blue-300 mb-2" />
+                                <div className="text-2xl font-bold text-white">{stats.totalImages}</div>
+                                <div className="text-blue-200 text-sm">Total Images</div>
+                            </div>
+                            
+                            <div className="bg-orange-500/20 backdrop-blur border border-orange-400/30 rounded-xl p-4">
+                                <AlertCircle size={24} className="text-orange-300 mb-2" />
+                                <div className="text-2xl font-bold text-white">{stats.lowConfidence}</div>
+                                <div className="text-orange-200 text-sm">Low Confidence</div>
+                            </div>
+                            
+                            <div className="bg-purple-500/20 backdrop-blur border border-purple-400/30 rounded-xl p-4">
+                                <Image size={24} className="text-purple-300 mb-2" />
+                                <div className="text-2xl font-bold text-white">{stats.syntheticGenerated}</div>
+                                <div className="text-purple-200 text-sm">Synthetic Generated</div>
+                            </div>
+                            
+                            <div className="bg-green-500/20 backdrop-blur border border-green-400/30 rounded-xl p-4">
+                                <BarChart3 size={24} className="text-green-300 mb-2" />
+                                <div className="text-2xl font-bold text-white">{stats.modelsEvaluated}</div>
+                                <div className="text-green-200 text-sm">Models Evaluated</div>
+                            </div>
+                            
+                            <div className="bg-pink-500/20 backdrop-blur border border-pink-400/30 rounded-xl p-4">
+                                <TrendingUp size={24} className="text-pink-300 mb-2" />
+                                <div className="text-2xl font-bold text-white">+{stats.accuracyImprovement.toFixed(1)}%</div>
+                                <div className="text-pink-200 text-sm">Accuracy Gain</div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                    <CheckCircle size={24} className="text-yellow-300" /> Pending Your Review
+                                </h2>
+                                
+                                {pendingActions.length === 0 ? (
+                                    <div className="text-purple-200 text-center py-8">
+                                        No pending actions. Agent is working autonomously.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {pendingActions.map(action => (
+                                            <div key={action.id} className="bg-white/5 rounded-lg p-4 border border-yellow-400/30">
+                                                <div className="text-yellow-300 text-sm mb-2">Day {action.day} • {action.category}</div>
+                                                <div className="text-white font-semibold mb-2">{action.question}</div>
+                                                <div className="text-purple-200 text-sm mb-3">{action.imageCount} images ready for review</div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {action.options.map(option => (
+                                                        <button
+                                                            key={option}
+                                                            onClick={() => handleAction(action.id, option)}
+                                                            className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-lg transition-colors"
+                                                        >
+                                                            {option}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                    <Clock size={24} className="text-blue-300" /> Daily Progress Reports
+                                </h2>
+                                
+                                <div className="space-y-4 max-h-96 overflow-y-auto">
+                                    {dailyReports.length === 0 ? (
+                                        <div className="text-purple-200 text-center py-8">
+                                            Start the agent to see daily reports
+                                        </div>
+                                    ) : (
+                                        dailyReports.map(report => (
+                                            <div key={report.day} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="text-white font-bold">Day {report.day} Report</div>
+                                                    <div className="text-purple-300 text-sm">{report.timestamp}</div>
+                                                </div>
+                                                
+                                                <div className="space-y-2 mb-3">
+                                                    {report.activities.map((activity, idx) => (
+                                                        <div key={idx} className="text-sm">
+                                                            <div className="text-purple-200">{activity.description}</div>
+                                                            <div className="text-purple-400 text-xs ml-4 whitespace-pre-line">{activity.details}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                
+                                                {report.recommendations.length > 0 && (
+                                                    <div className="mt-3 pt-3 border-t border-white/10">
+                                                        <div className="text-green-300 text-xs font-semibold mb-1">💡 Recommendations:</div>
+                                                        {report.recommendations.map((rec, idx) => (
+                                                            <div key={idx} className="text-green-200 text-xs ml-2">
+                                                                • {rec.text}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 bg-white/5 backdrop-blur rounded-xl p-4 border border-white/10">
+                            <h3 className="text-white font-semibold mb-2">🔄 Autonomous Agent Workflow</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+                                <div className="text-purple-200">
+                                    <span className="font-semibold text-blue-300">1. Monitor:</span> Scan for low confidence predictions
+                                </div>
+                                <div className="text-purple-200">
+                                    <span className="font-semibold text-purple-300">2. Generate:</span> Create synthetic training data
+                                </div>
+                                <div className="text-purple-200">
+                                    <span className="font-semibold text-yellow-300">3. Request:</span> Human reviews labeling decisions
+                                </div>
+                                <div className="text-purple-200">
+                                    <span className="font-semibold text-green-300">4. Evaluate:</span> Test & route to best models
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ProactiveDetectionAgent />);
+    </script>
+</body>
+</html>
