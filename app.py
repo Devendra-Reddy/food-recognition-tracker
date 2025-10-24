@@ -12,6 +12,122 @@ from datetime import datetime
 import random
 import time
 
+# Add this near the top of your app.py, after other imports
+
+# Import proactive agent
+try:
+    from services.proactive_agent import get_proactive_agent, start_agent, stop_agent
+    PROACTIVE_AGENT_ENABLED = True
+except ImportError:
+    PROACTIVE_AGENT_ENABLED = False
+    print("⚠️ Proactive agent not available")
+
+# After creating the Flask app, initialize the agent
+if PROACTIVE_AGENT_ENABLED:
+    proactive_agent = start_agent()
+    print("✅ Proactive detection agent initialized and running")
+else:
+    proactive_agent = None
+
+# MODIFY your existing process_food_analysis function to log to agent:
+# Add this AFTER you get the detection result (around line where you have detected_food)
+
+def process_food_analysis(data, progress_callback):
+    """Process food analysis with real-time detection"""
+    try:
+        filepath = data['filepath']
+        
+        # ... your existing detection code ...
+        
+        # After detection, before returning result:
+        # LOG TO AGENT
+        if PROACTIVE_AGENT_ENABLED and proactive_agent:
+            proactive_agent.log_detection(
+                food_name=detected_food,
+                confidence=confidence,
+                category=food_category,
+                detection_method=detection_method
+            )
+        
+        # ... rest of your existing code ...
+        
+        return result
+
+# ADD THESE NEW ROUTES at the end of your routes section:
+
+@app.route('/api/agent-dashboard/data', methods=['GET'])
+def get_agent_dashboard_data():
+    """Get real-time agent dashboard data"""
+    if not PROACTIVE_AGENT_ENABLED:
+        return jsonify({'error': 'Agent not available'}), 503
+    
+    try:
+        data = proactive_agent.get_dashboard_data()
+        return jsonify({
+            'success': True,
+            'data': data
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/agent-dashboard/action', methods=['POST'])
+def handle_agent_action():
+    """Handle user response to agent action"""
+    if not PROACTIVE_AGENT_ENABLED:
+        return jsonify({'error': 'Agent not available'}), 503
+    
+    try:
+        data = request.json
+        action_id = data.get('action_id')
+        response = data.get('response')
+        
+        if not action_id or not response:
+            return jsonify({'error': 'Missing action_id or response'}), 400
+        
+        result = proactive_agent.handle_action_response(action_id, response)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/agent-dashboard/trigger-report', methods=['POST'])
+def trigger_agent_report():
+    """Manually trigger a report (for testing)"""
+    if not PROACTIVE_AGENT_ENABLED:
+        return jsonify({'error': 'Agent not available'}), 503
+    
+    try:
+        result = proactive_agent.trigger_immediate_report()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# UPDATE your shutdown function:
+@app.teardown_appcontext
+def shutdown_agent(exception=None):
+    if BACKGROUND_AGENT_ENABLED and background_agent:
+        background_agent.stop()
+    if PROACTIVE_AGENT_ENABLED and proactive_agent:
+        stop_agent()
+
+# UPDATE the startup message:
+if __name__ == "__main__":
+    print("🚀 Food Recognition Tracker - Enhanced Version")
+    print("✅ Real-time food detection with Roboflow AI")
+    print("✅ Accurate food classification")
+    print("✅ Health recommendations & body requirements")
+    print("✅ Background processing enabled")
+    print("✅ Proactive Agent monitoring detections")
+    print("✅ Agent Dashboard available at /agent-dashboard")
+    print("🔗 Visit: http://localhost:5000")
+    
+    try:
+        app.run(debug=True, host='0.0.0.0', port=5000)
+    finally:
+        if BACKGROUND_AGENT_ENABLED and background_agent:
+            background_agent.stop()
+        if PROACTIVE_AGENT_ENABLED:
+            stop_agent()
 # Load environment variables
 load_dotenv()
 
