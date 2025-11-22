@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Dashboard</title>
+  <style>
+    body { background:#0b1020; color:#eaeef7; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .container { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #151b2f; border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,.25); margin-bottom: 16px; }
+    .metric { display:inline-block; margin-right:16px; }
+    .metric > div { color:#9fb0d3; font-size:12px; }
+    .pill { display:inline-block; background:#0f1529; border:1px solid #2b3861; padding:3px 8px; border-radius:999px; margin-right:6px; font-size:12px; color:#9fb0d3; }
+    .link { color:#9aa9ff; text-decoration:none; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { text-align:left; border-bottom:1px solid #283158; padding:8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Agent Dashboard</h1>
+    <div id="status" class="card">Loading…</div>
+    <div class="card">
+      <h3>Popular Foods (30 days)</h3>
+      <table id="popular"><thead><tr><th>Food</th><th>Count</th><th>Avg conf</th><th>Trend</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+  <script>
+    async function loadData(){
+      const res = await fetch('/api/agent-dashboard/data');
+      const j = await res.json();
+      const s = document.getElementById('status');
+      if (!j.success) { s.textContent = 'Error: '+(j.error||'unknown'); return; }
+      const d = j.data;
+      s.innerHTML = '<div class="metric"><b>Status</b><div>'+d.agent_status.status+'</div></div>' +
+                    '<div class="metric"><b>Today scans</b><div>'+d.agent_status.today_scans+'</div></div>' +
+                    '<div class="metric"><b>Avg confidence</b><div>'+d.agent_status.average_confidence+'</div></div>' +
+                    '<div class="metric"><b>Total foods in DB</b><div>'+d.total_foods_in_db+'</div></div>';
+      const tbody = document.querySelector('#popular tbody'); tbody.innerHTML='';
+      (d.popular_foods||[]).forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td>'+row.food_name+'</td><td>'+row.count+'</td><td>'+row.avg_confidence+'</td><td>'+row.trend+'</td>';
+        tbody.appendChild(tr);
+      });
+    }
+    loadData();
+  </script>
+</body>
+</html>

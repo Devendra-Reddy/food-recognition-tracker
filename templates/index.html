@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Food Recognition Tracker</title>
+  <style>
+    body { background: #0b1020; color:#eaeef7; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .container { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #151b2f; border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    .btn { padding: 10px 14px; border: none; border-radius:8px; cursor:pointer; }
+    .btn-primary { background: #7c3aed; color: #fff; }
+    .btn-secondary { background: #24304e; color: #c9d2ea; }
+    .btn:disabled{ opacity: .6; cursor: not-allowed; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 900px){ .row { grid-template-columns: 1fr 1fr; } }
+    input[type="file"] { display:block; width:100%; }
+    .form-control, .form-select { background:#0f1529; color:#eaeef7; border:1px solid #27324e; padding:10px; border-radius:8px; }
+    label { color:#9fb0d3; font-size:14px; }
+    #preview { width:100%; max-height:320px; object-fit:contain; border-radius:8px; background:#0f1529; }
+    #result { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .pill { display:inline-block; background:#0f1529; border:1px solid #2b3861; padding:3px 8px; border-radius:999px; margin-right:6px; font-size:12px; color:#9fb0d3; }
+    .link { color:#9aa9ff; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Food Recognition Tracker</h1>
+    <div class="row">
+      <div class="card">
+        <h2>Upload Food Image</h2>
+        <div id="upload-area">
+          <input id="file-input" class="form-control" type="file" accept="image/*">
+          <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+            <label><input type="checkbox" id="use-multimodel-checkbox" checked> Use Multi-Model Detection (recommended)</label>
+          </div>
+
+          <!-- Camera controls -->
+          <div class="mt-3" id="camera-controls" style="margin-top:10px;">
+            <button id="btn-open-camera" class="btn btn-secondary" type="button">📷 Take Photo</button>
+            <video id="camera-preview" autoplay playsinline style="display:none; width:100%; max-height:280px; border-radius:8px; margin-top:8px;"></video>
+            <div id="camera-actions" style="display:none; margin-top:8px;">
+              <button id="btn-capture" class="btn btn-primary" type="button">Capture</button>
+              <button id="btn-cancel-camera" class="btn btn-secondary" type="button">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Quantity controls -->
+          <div class="mt-3" id="quantity-controls" style="margin-top:12px;">
+            <label class="form-label">Quantity (optional, for calorie estimate)</label>
+            <div style="display:flex; gap:8px;">
+              <input id="quantity-value" class="form-control" type="number" min="0" step="0.1" placeholder="e.g., 150">
+              <select id="quantity-unit" class="form-select" style="max-width:180px;">
+                <option value="">Unit…</option>
+                <option value="g">grams (g)</option>
+                <option value="ml">milliliters (ml)</option>
+                <option value="slice">slice(s)</option>
+                <option value="piece">piece(s)</option>
+                <option value="serving">serving(s)</option>
+              </select>
+            </div>
+          </div>
+
+          <img id="preview" style="margin-top:12px; display:none;" alt="Preview"/>
+
+          <div style="margin-top:12px;">
+            <button id="btn-analyze" class="btn btn-primary" type="button">🔎 Analyze Food Image</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Analysis Results</h2>
+        <div id="result"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2>AI Agent Dashboard</h2>
+      <div style="margin-bottom:8px;">
+        <span class="pill"><a class="link" href="/agent-dashboard">Open Agent Dashboard</a></span>
+        <span class="pill"><a class="link" href="/health">Health</a></span>
+      </div>
+      <pre id="dashboard-preview" class="form-control" style="max-height:280px; overflow:auto;"></pre>
+      <button id="btn-refresh-dashboard" class="btn btn-secondary" type="button">Refresh Dashboard Data</button>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
