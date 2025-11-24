@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Recognition Tracker - AI-Powered Food Detection</title>
+    <script src="https://cdn.tailwindcss.com">
+        // --- Camera support ---
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+        const cameraActions = document.getElementById('cameraActions');
+        let camStream = null;
+        async function openCamera(){
+            try{
+                camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+                cameraPreview.srcObject = camStream;
+                cameraPreview.classList.remove('hidden');
+                cameraActions.classList.remove('hidden');
+            }catch(e){ alert('Camera not available or permission denied.'); console.error(e); }
+        }
+        function stopCamera(){
+            if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+            cameraPreview.srcObject=null; cameraPreview.classList.add('hidden'); cameraActions.classList.add('hidden');
+        }
+        async function capturePhotoToFile(){
+            const canvas = document.createElement('canvas');
+            const w = cameraPreview.videoWidth || 1280, h = cameraPreview.videoHeight || 720;
+            const maxW = 1280, scale = Math.min(1, maxW / w);
+            canvas.width = Math.round(w*scale); canvas.height = Math.round(h*scale);
+            const ctx = canvas.getContext('2d'); ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+            return new Promise(resolve => canvas.toBlob(b => resolve(new File([b], 'camera.jpg', {type:'image/jpeg'})), 'image/jpeg', 0.92));
+        }
+        if (openCameraBtn){
+            openCameraBtn.addEventListener('click', openCamera);
+            cancelCameraBtn.addEventListener('click', stopCamera);
+            captureBtn.addEventListener('click', async () => {
+                const file = await capturePhotoToFile(); stopCamera();
+                const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files; displayPreview(file);
+            });
+        }
+
+        // --- Extend form to include quantity ---
+        const origSubmitHandler = async function(event){
+            event.preventDefault();
+            if (!fileInput.files[0]){ alert('Please select an image first!'); return; }
+            const formData = new FormData(); formData.append('file', fileInput.files[0]);
+            const useMultiModel = document.getElementById('useMultiModel').checked; formData.append('use_multi_model', useMultiModel);
+            const qv = document.getElementById('qtyValue')?.value; const qu = document.getElementById('qtyUnit')?.value;
+            if (qv) formData.append('quantity_value', qv); if (qu) formData.append('quantity_unit', qu);
+            loading.classList.remove('hidden'); results.classList.add('hidden'); submitBtn.disabled = true;
+            try{
+                const r = await fetch('/analyze', { method:'POST', body: formData });
+                const data = await r.json(); loading.classList.add('hidden'); submitBtn.disabled = false;
+                renderResults(data);
+            }catch(e){ loading.classList.add('hidden'); submitBtn.disabled=false; alert('Error: '+e.message); }
+        };
+        uploadForm.removeEventListener('submit', ()=>{}); // no-op to avoid duplicate
+        uploadForm.addEventListener('submit', origSubmitHandler);
+
+        // --- Confirmation & rendering ---
+        const confirmBlock = document.getElementById('confirmBlock');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const confirmBtn = document.getElementById('confirmBtn');
+        let pendingImageId = null; let chosenFoodName = null;
+
+        function suggestionPill(name){
+            const b = document.createElement('button');
+            b.type='button'; b.textContent=name;
+            b.className='px-3 py-1 rounded-full bg-gray-600 hover:bg-gray-500';
+            b.onclick=()=>{ chosenFoodName=name; [...suggestionsDiv.children].forEach(c=>c.classList.remove('ring-2','ring-blue-400')); b.classList.add('ring-2','ring-blue-400'); };
+            return b;
+        }
+
+        confirmBtn?.addEventListener('click', async ()=>{
+            if (!chosenFoodName || !pendingImageId){ alert('Please choose a food.'); return; }
+            try{
+                const qv = document.getElementById('qtyValue')?.value; const qu = document.getElementById('qtyUnit')?.value;
+                const fd = new FormData(); fd.append('image_id', pendingImageId); fd.append('food_name', chosenFoodName);
+                if (qv) fd.append('quantity_value', qv); if (qu) fd.append('quantity_unit', qu);
+                const res = await fetch('/finalize', { method:'POST', body: fd }); const data = await res.json();
+                renderResults(data); confirmBlock.classList.add('hidden'); suggestionsDiv.innerHTML='';
+            }catch(e){ alert('Confirm failed: ' + e.message); }
+        });
+
+        function renderResults(data){
+            results.classList.remove('hidden');
+            if (data.needs_confirmation){
+                // show top-3 suggestions
+                pendingImageId = data.image_id || null;
+                suggestionsDiv.innerHTML='';
+                (data.top_suggestions||[]).forEach(n=> suggestionsDiv.appendChild(suggestionPill(n)));
+                confirmBlock.classList.remove('hidden');
+            } else {
+                confirmBlock.classList.add('hidden');
+                suggestionsDiv.innerHTML='';
+            }
+
+            if (data.error){
+                resultsContent.innerHTML = `<div class="bg-red-900 border border-red-700 rounded-lg p-6">
+                    <p class="text-red-300 text-xl font-bold mb-2">❌ Error</p><p class="text-red-200">${data.error}</p></div>`; return;
+            }
+
+            const conf = (data.confidence * 100).toFixed(1);
+            const calories = data.calories ? `${data.calories} kcal` : '—';
+            const verdict = data.health?.verdict || '—';
+            const reasons = (data.health?.reasons || []).map(r=>`<li>• ${r}</li>`).join('');
+            const demo = data.demographics || {};
+
+            resultsContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-2xl font-bold">🍽️ Detected Food</h4>
+                            <span class="text-sm ${data.multi_model ? 'text-purple-400' : 'text-blue-400'}">
+                                ${data.multi_model ? '🔬 Multi-Model' : '🤖 Single Model'}
+                            </span>
+                        </div>
+                        <p class="text-4xl font-bold mb-2">${data.food_name}</p>
+                        <p class="text-gray-300">Confidence: <b>${conf}%</b></p>
+                        <p class="text-gray-300 mt-2">Calories: <b>${calories}</b> ${data.calorie_basis ? ` <span class="text-gray-400">(${data.calorie_basis})</span>` : ''}</p>
+                        <div class="mt-3 p-3 rounded ${verdict==='Good'?'bg-green-900 border border-green-700': verdict==='Caution'?'bg-yellow-900 border border-yellow-700':'bg-red-900 border border-red-700'}">
+                            <p class="font-semibold">Health verdict: ${verdict}</p>
+                            ${reasons ? `<ul class="text-sm mt-1 text-gray-200">${reasons}</ul>` : ''}
+                        </div>
+                        ${demo.cuisine ? `<p class="text-sm text-gray-300 mt-3">Cuisine: <b>${demo.cuisine}</b>${demo.region?`, Region: ${demo.region}`:''}</p>`:''}
+                        ${demo.allergens ? `<p class="text-sm text-gray-300">Common allergens: ${demo.allergens.join(', ')}</p>`:''}
+                    </div>
+                </div>
+            `;
+        }
+
+    </script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white min-h-screen">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-gray-800 border-b border-gray-700 shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-3xl">🍕</span>
+                    <h1 class="text-2xl font-bold">Food Recognition Tracker</h1>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                        🏠 Home
+                    </a>
+                    
+                    <a href="/agent-dashboard" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">
+                        🤖 AI Agent
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12 max-w-4xl">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <h2 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">
+                AI-Powered Food Detection
+            </h2>
+            <p class="text-xl text-gray-300 mb-8">
+                Upload a food image and let our AI identify it with confidence scores
+            </p>
+        </div>
+
+        <!-- Quick Access Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors cursor-pointer transform hover:scale-105 duration-200" onclick="document.getElementById('fileInput').click()">
+                <div class="text-4xl mb-3">📸</div>
+                <h3 class="text-xl font-bold mb-2">Upload Image</h3>
+                <p class="text-gray-400 text-sm">Click to analyze a food photo</p>
+            </div>
+            
+            
+            
+            <a href="/agent-dashboard" class="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 transition-colors transform hover:scale-105 duration-200 block">
+                <div class="text-4xl mb-3">🤖</div>
+                <h3 class="text-xl font-bold mb-2">AI Agent</h3>
+                <p class="text-gray-400 text-sm">View analytics & insights</p>
+            </a>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-8 mb-8">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <span class="mr-3">📤</span> Upload Food Image
+            </h3>
+            
+            <form id="uploadForm" class="space-y-6">
+                <!-- File Input -->
+                <div class="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 transition-colors cursor-pointer" 
+                     onclick="document.getElementById('fileInput').click()"
+                     ondrop="handleDrop(event)"
+                     ondragover="handleDragOver(event)">
+                    <input type="file" 
+                           id="fileInput" 
+                           name="file" 
+                           accept="image/*" 
+                           class="hidden" 
+                           onchange="handleFileSelect(event)">
+                    <div id="dropZone">
+                        <div class="text-6xl mb-4">🖼️</div>
+                        <p class="text-xl mb-2">Click to upload or drag & drop</p>
+                        <p class="text-gray-400 text-sm">Supports: JPG, PNG, GIF, WebP</p>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div id="preview" class="hidden">
+                    <img id="previewImage" class="max-w-full h-auto rounded-lg shadow-lg mx-auto" style="max-height: 400px;">
+                    <p id="fileName" class="text-center mt-4 text-gray-300"></p>
+                </div>
+
+                <!-- Options -->
+                <div class="bg-gray-700 rounded-lg p-4">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" id="useMultiModel" class="w-5 h-5 rounded" checked>
+                        <span class="text-sm">
+                            🔬 Use Multi-Model Detection (more accurate, slower)
+                        </span>
+                    </label>
+                </div>
+
+                
+                <!-- Camera + Quantity additions (preserve old style) -->
+                <div class="bg-gray-700 rounded-lg p-4 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <button type="button" id="openCameraBtn" class="px-3 py-2 rounded bg-gray-600 hover:bg-gray-500">📷 Take Photo</button>
+                        <video id="cameraPreview" autoplay playsinline class="h-32 rounded hidden"></video>
+                        <div id="cameraActions" class="hidden flex gap-2">
+                            <button type="button" id="captureBtn" class="px-3 py-2 rounded bg-blue-600 hover:bg-blue-700">Capture</button>
+                            <button type="button" id="cancelCameraBtn" class="px-3 py-2 rounded bg-gray-600 hover:bg-gray-500">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input id="qtyValue" type="number" min="0" step="0.1" placeholder="e.g., 150" class="col-span-1 bg-gray-800 rounded px-3 py-2" />
+                        <select id="qtyUnit" class="col-span-2 bg-gray-800 rounded px-3 py-2">
+                            <option value="">Unit…</option>
+                            <option value="g">grams (g)</option>
+                            <option value="ml">milliliters (ml)</option>
+                            <option value="slice">slice(s)</option>
+                            <option value="piece">piece(s)</option>
+                            <option value="serving">serving(s)</option>
+                        </select>
+                    </div>
+                    <p class="text-gray-300 text-sm">Tip: enter grams for most accurate calories.</p>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                    🚀 Analyze Food Image
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden bg-gray-800 rounded-xl shadow-2xl p-8">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <span class="mr-3">📊</span> Analysis Results
+            </h3>
+            
+    <div id="resultsContent"></div>
+    <div id="confirmBlock" class="hidden mt-4 bg-gray-700 rounded-lg p-4">
+        <p class="text-gray-200 mb-2">We’re not 100% certain — please pick the correct item:</p>
+        <div id="suggestions" class="flex flex-wrap gap-2"></div>
+        <button id="confirmBtn" class="mt-3 px-4 py-2 rounded bg-blue-600 hover:bg-blue-700">Confirm</button>
+    </div>
+    
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-xl p-8 text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
+                <p class="text-xl font-bold">Analyzing your food...</p>
+                <p class="text-gray-400 mt-2">This may take a few seconds</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-12 py-6">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p>🍕 Food Recognition Tracker with AI Agent | Powered by Advanced ML Models</p>
+            <div class="mt-2 space-x-4">
+                <a href="/health" target="_blank" class="hover:text-blue-400">Health Check</a>
+                <span>•</span>
+                <a href="/api/agent-dashboard/data" target="_blank" class="hover:text-blue-400">API Status</a>
+                <span>•</span>
+                <a href="/agent-dashboard" class="hover:text-blue-400">Dashboard</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const results = document.getElementById('results');
+        const resultsContent = document.getElementById('resultsContent');
+        const loading = document.getElementById('loading');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                displayPreview(file);
+            }
+        }
+
+        // Handle drag and drop
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('border-blue-500');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('border-blue-500');
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                fileInput.files = event.dataTransfer.files;
+                displayPreview(file);
+            }
+        }
+
+        // Display image preview
+        function displayPreview(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                fileName.textContent = file.name;
+                preview.classList.remove('hidden');
+                submitBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Handle form submission
+        uploadForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            if (!fileInput.files[0]) {
+                alert('Please select an image first!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            const useMultiModel = document.getElementById('useMultiModel').checked;
+            formData.append('use_multi_model', useMultiModel);
+
+            // Show loading
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                // Hide loading
+                loading.classList.add('hidden');
+                submitBtn.disabled = false;
+
+                // Display results
+                displayResults(data);
+
+            } catch (error) {
+                loading.classList.add('hidden');
+                submitBtn.disabled = false;
+                alert('Error analyzing image: ' + error.message);
+                console.error('Error:', error);
+            }
+        });
+
+        // Display analysis results
+        function displayResults(data) {
+            results.classList.remove('hidden');
+            
+            if (data.error) {
+                resultsContent.innerHTML = `
+                    <div class="bg-red-900 border border-red-700 rounded-lg p-6">
+                        <p class="text-red-300 text-xl font-bold mb-2">❌ Error</p>
+                        <p class="text-red-200">${data.error}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const confidence = (data.confidence * 100).toFixed(1);
+            const confidenceColor = data.confidence >= 0.7 ? 'text-green-400' : 
+                                   data.confidence >= 0.5 ? 'text-yellow-400' : 'text-red-400';
+            
+            let html = `
+                <div class="space-y-6">
+                    <!-- Main Result -->
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-2xl font-bold">🍽️ Detected Food</h4>
+                            <span class="text-sm ${data.multi_model ? 'text-purple-400' : 'text-blue-400'}">
+                                ${data.multi_model ? '🔬 Multi-Model' : '🤖 Single Model'}
+                            </span>
+                        </div>
+                        <p class="text-4xl font-bold mb-4">${data.food_name}</p>
+                        <div class="flex items-center space-x-3">
+                            <span class="text-gray-400">Confidence:</span>
+                            <span class="${confidenceColor} text-3xl font-bold">${confidence}%</span>
+                        </div>
+                        <div class="mt-4 bg-gray-600 rounded-full h-4 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000" 
+                                 style="width: ${confidence}%"></div>
+                        </div>
+                    </div>
+            `;
+
+            // Multi-model results
+            if (data.multi_model && data.all_model_results) {
+                html += `
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h4 class="text-xl font-bold mb-4">🔬 Model Comparison</h4>
+                        <div class="space-y-3">
+                `;
+                
+                for (const [modelId, result] of Object.entries(data.all_model_results)) {
+                    const modelConf = (result.confidence * 100).toFixed(1);
+                    html += `
+                        <div class="flex items-center justify-between bg-gray-600 p-3 rounded">
+                            <span class="font-semibold">${result.model}</span>
+                            <span class="text-blue-400">${modelConf}%</span>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                        <div class="mt-4 p-3 bg-gray-600 rounded">
+                            <p class="text-sm text-gray-300">
+                                Model Agreement: <span class="font-bold text-${data.model_agreement === 'high' ? 'green' : data.model_agreement === 'medium' ? 'yellow' : 'red'}-400">
+                                    ${data.model_agreement.toUpperCase()}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Synthetic generation message
+            if (data.synthetic_generated) {
+                html += `
+                    <div class="bg-yellow-900 border border-yellow-700 rounded-lg p-6">
+                        <p class="text-yellow-300 text-lg font-bold mb-2">🎨 Synthetic Data Generated</p>
+                        <p class="text-yellow-200">${data.message}</p>
+                        <p class="text-sm text-yellow-300 mt-2">The AI agent detected low confidence and automatically generated training data to improve future predictions.</p>
+                    </div>
+                `;
+            }
+
+            // Actions
+            html += `
+                <div class="flex space-x-4">
+                    <button onclick="uploadAnother()" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                        📸 Upload Another
+                    </button>
+                    <a href="/agent-dashboard" 
+                       class="flex-1 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold transition-colors text-center">
+                        📊 View Dashboard
+                    </a>
+                </div>
+            `;
+
+            html += '</div>';
+            resultsContent.innerHTML = html;
+
+            // Scroll to results
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function uploadAnother() {
+            fileInput.value = '';
+            preview.classList.add('hidden');
+            results.classList.add('hidden');
+            submitBtn.disabled = false;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    
+        // --- Camera support ---
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+        const cameraActions = document.getElementById('cameraActions');
+        let camStream = null;
+        async function openCamera(){
+            try{
+                camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+                cameraPreview.srcObject = camStream;
+                cameraPreview.classList.remove('hidden');
+                cameraActions.classList.remove('hidden');
+            }catch(e){ alert('Camera not available or permission denied.'); console.error(e); }
+        }
+        function stopCamera(){
+            if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+            cameraPreview.srcObject=null; cameraPreview.classList.add('hidden'); cameraActions.classList.add('hidden');
+        }
+        async function capturePhotoToFile(){
+            const canvas = document.createElement('canvas');
+            const w = cameraPreview.videoWidth || 1280, h = cameraPreview.videoHeight || 720;
+            const maxW = 1280, scale = Math.min(1, maxW / w);
+            canvas.width = Math.round(w*scale); canvas.height = Math.round(h*scale);
+            const ctx = canvas.getContext('2d'); ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+            return new Promise(resolve => canvas.toBlob(b => resolve(new File([b], 'camera.jpg', {type:'image/jpeg'})), 'image/jpeg', 0.92));
+        }
+        if (openCameraBtn){
+            openCameraBtn.addEventListener('click', openCamera);
+            cancelCameraBtn.addEventListener('click', stopCamera);
+            captureBtn.addEventListener('click', async () => {
+                const file = await capturePhotoToFile(); stopCamera();
+                const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files; displayPreview(file);
+            });
+        }
+
+        // --- Extend form to include quantity ---
+        const origSubmitHandler = async function(event){
+            event.preventDefault();
+            if (!fileInput.files[0]){ alert('Please select an image first!'); return; }
+            const formData = new FormData(); formData.append('file', fileInput.files[0]);
+            const useMultiModel = document.getElementById('useMultiModel').checked; formData.append('use_multi_model', useMultiModel);
+            const qv = document.getElementById('qtyValue')?.value; const qu = document.getElementById('qtyUnit')?.value;
+            if (qv) formData.append('quantity_value', qv); if (qu) formData.append('quantity_unit', qu);
+            loading.classList.remove('hidden'); results.classList.add('hidden'); submitBtn.disabled = true;
+            try{
+                const r = await fetch('/analyze', { method:'POST', body: formData });
+                const data = await r.json(); loading.classList.add('hidden'); submitBtn.disabled = false;
+                renderResults(data);
+            }catch(e){ loading.classList.add('hidden'); submitBtn.disabled=false; alert('Error: '+e.message); }
+        };
+        uploadForm.removeEventListener('submit', ()=>{}); // no-op to avoid duplicate
+        uploadForm.addEventListener('submit', origSubmitHandler);
+
+        // --- Confirmation & rendering ---
+        const confirmBlock = document.getElementById('confirmBlock');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const confirmBtn = document.getElementById('confirmBtn');
+        let pendingImageId = null; let chosenFoodName = null;
+
+        function suggestionPill(name){
+            const b = document.createElement('button');
+            b.type='button'; b.textContent=name;
+            b.className='px-3 py-1 rounded-full bg-gray-600 hover:bg-gray-500';
+            b.onclick=()=>{ chosenFoodName=name; [...suggestionsDiv.children].forEach(c=>c.classList.remove('ring-2','ring-blue-400')); b.classList.add('ring-2','ring-blue-400'); };
+            return b;
+        }
+
+        confirmBtn?.addEventListener('click', async ()=>{
+            if (!chosenFoodName || !pendingImageId){ alert('Please choose a food.'); return; }
+            try{
+                const qv = document.getElementById('qtyValue')?.value; const qu = document.getElementById('qtyUnit')?.value;
+                const fd = new FormData(); fd.append('image_id', pendingImageId); fd.append('food_name', chosenFoodName);
+                if (qv) fd.append('quantity_value', qv); if (qu) fd.append('quantity_unit', qu);
+                const res = await fetch('/finalize', { method:'POST', body: fd }); const data = await res.json();
+                renderResults(data); confirmBlock.classList.add('hidden'); suggestionsDiv.innerHTML='';
+            }catch(e){ alert('Confirm failed: ' + e.message); }
+        });
+
+        function renderResults(data){
+            results.classList.remove('hidden');
+            if (data.needs_confirmation){
+                // show top-3 suggestions
+                pendingImageId = data.image_id || null;
+                suggestionsDiv.innerHTML='';
+                (data.top_suggestions||[]).forEach(n=> suggestionsDiv.appendChild(suggestionPill(n)));
+                confirmBlock.classList.remove('hidden');
+            } else {
+                confirmBlock.classList.add('hidden');
+                suggestionsDiv.innerHTML='';
+            }
+
+            if (data.error){
+                resultsContent.innerHTML = `<div class="bg-red-900 border border-red-700 rounded-lg p-6">
+                    <p class="text-red-300 text-xl font-bold mb-2">❌ Error</p><p class="text-red-200">${data.error}</p></div>`; return;
+            }
+
+            const conf = (data.confidence * 100).toFixed(1);
+            const calories = data.calories ? `${data.calories} kcal` : '—';
+            const verdict = data.health?.verdict || '—';
+            const reasons = (data.health?.reasons || []).map(r=>`<li>• ${r}</li>`).join('');
+            const demo = data.demographics || {};
+
+            resultsContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-2xl font-bold">🍽️ Detected Food</h4>
+                            <span class="text-sm ${data.multi_model ? 'text-purple-400' : 'text-blue-400'}">
+                                ${data.multi_model ? '🔬 Multi-Model' : '🤖 Single Model'}
+                            </span>
+                        </div>
+                        <p class="text-4xl font-bold mb-2">${data.food_name}</p>
+                        <p class="text-gray-300">Confidence: <b>${conf}%</b></p>
+                        <p class="text-gray-300 mt-2">Calories: <b>${calories}</b> ${data.calorie_basis ? ` <span class="text-gray-400">(${data.calorie_basis})</span>` : ''}</p>
+                        <div class="mt-3 p-3 rounded ${verdict==='Good'?'bg-green-900 border border-green-700': verdict==='Caution'?'bg-yellow-900 border border-yellow-700':'bg-red-900 border border-red-700'}">
+                            <p class="font-semibold">Health verdict: ${verdict}</p>
+                            ${reasons ? `<ul class="text-sm mt-1 text-gray-200">${reasons}</ul>` : ''}
+                        </div>
+                        ${demo.cuisine ? `<p class="text-sm text-gray-300 mt-3">Cuisine: <b>${demo.cuisine}</b>${demo.region?`, Region: ${demo.region}`:''}</p>`:''}
+                        ${demo.allergens ? `<p class="text-sm text-gray-300">Common allergens: ${demo.allergens.join(', ')}</p>`:''}
+                    </div>
+                </div>
+            `;
+        }
+
+    </script>
+</body>
+</html>
