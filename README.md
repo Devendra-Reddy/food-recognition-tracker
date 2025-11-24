@@ -1,7 +1,5 @@
 
-# Food Recognition Tracker — Pro Release (Old UI Preserved)
-
-This project keeps your **original Tailwind UI** and adds:
+# Food Recognition Tracker 
 - 📷 Camera capture
 - ⚖️ Quantity & unit → **calorie estimate**
 - 🧠 Stable naming via canonicalization
